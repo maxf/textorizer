@@ -31,7 +31,9 @@ PFont font;
 List Words;
 int NbWords;
 
-int Mode=2; // 1,2,3: textorizer version
+int Mode=0; 
+// 0: do nothing
+// 1,2,3: textorizer version
 
 String[] fontList = PFont.list();
 
@@ -51,7 +53,7 @@ int InputWidth, InputHeight; // width of the original picture
 int bgOpacity=30;
 
 // common controls
-Controller bgOpacitySlider, imageNameLabel, wordsTextfield, wordsFileLabel, svgFileLabel, imageInfoLabel, wordsInfoLabel, svgInfoLabel, textorizer1label, textorizer2label;
+Controller bgOpacitySlider, imageNameLabel, wordsTextfield, wordsFileLabel, svgFileLabel, imageInfoLabel, wordsInfoLabel, svgInfoLabel, textorizer1label, textorizer2label, progressSlider;
 ScrollList fontSelector;
 
 // textorizer1 controls
@@ -137,9 +139,11 @@ void setup() {
   controlWindow.setBackground(color(40));
   controlWindow.setUpdateMode(ControlWindow.NORMAL);
 
+  //  progressSlider = controlP5.addSlider("Progress",0,100,42, 10,ypos, 100,20); ypos+=30; progressSlider.setWindow(controlWindow);
 
   // common controls
   imageNameLabel  = controlP5.addTextlabel("Image","Image: "+ImageFileName, 10,ypos); ypos+=15;
+
   imageInfoLabel  = controlP5.addTextlabel("ImageInfo","(Press i to change)",10,ypos); ypos+=20;
   bgOpacitySlider = controlP5.addSlider("Background Opacity",0,255,bgOpacity, 10,ypos, 100,20); ypos+=30;
   wordsFileLabel = controlP5.addTextlabel("Words","Words: "+((WordsFileName==null)?"":WordsFileName), 10,ypos); ypos+=15; 
@@ -208,24 +212,25 @@ String word;
 
 void draw()
 {
-  println("draw");
+  controlWindow.hide();
   cursor(WAIT);
   background(255);
 
-  setupSvg();
-  setupFont();
-  setupBgPicture();
-
-  switch(Mode) {
-  case 1: textorize(); break;
-  case 2: textorize2(); break;
-  default: textorize();
+  if (Mode != 0) {
+    setupSvg();
+    setupFont();
+    setupBgPicture();
+    
+    switch(Mode) {
+    case 1: textorize(); break;
+    case 2: textorize2(); break;
+    }
   }
-  fill(120);
+  //  fill(120);
+  cursor(ARROW);
   controlWindow.update();
   controlP5.draw();
-  cursor(ARROW);
-  println("enddraw");
+  controlWindow.show();
 }
 
 void setupSvg() {
