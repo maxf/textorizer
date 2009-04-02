@@ -7,7 +7,6 @@
  */
 
 // TODO: 
-// - spinner for waiting
 // - resize window
 // - color adjust
 // - image export
