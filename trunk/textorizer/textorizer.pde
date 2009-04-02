@@ -18,7 +18,7 @@ import java.io.*;
 import javax.swing.*;
 
 ControlP5 controlP5;
-ControlWindow controlWindow;
+ControlWindow controlWindow; // the controls must be in a separate window, since the controls window must refresh constantly, while the rendering window only refreshes when you tell it to.
 
 //String ImageFileName="http://lapin-bleu.net/software/textorizer/textorizer1_2/data/london.jpg";
 String ImageFileName="http://farm1.static.flickr.com/33/59279271_fe73796ca6.jpg";
@@ -51,7 +51,7 @@ int InputWidth, InputHeight; // width of the original picture
 int bgOpacity=30;
 
 // common controls
-Controller bgOpacitySlider, imageNameLabel, wordsTextfield, wordsFileLabel, svgFileLabel, imageInfoLabel, wordsInfoLabel, svgInfoLabel, textorizer1label, textorizer2label, progressSlider;
+Controller bgOpacitySlider, imageNameLabel, wordsTextfield, wordsFileLabel, svgFileLabel, imageInfoLabel, wordsInfoLabel, svgInfoLabel, textorizer1label, textorizer2label;
 ScrollList fontSelector;
 
 // textorizer1 controls
@@ -139,8 +139,6 @@ void setup() {
 
 
   // common controls
-  progressSlider = controlP5.addSlider("Progress",0,100,0, 1,ypos, 300,30); ypos+=30; progressSlider.setWindow(controlWindow);
-
   imageNameLabel  = controlP5.addTextlabel("Image","Image: "+ImageFileName, 10,ypos); ypos+=15;
   imageInfoLabel  = controlP5.addTextlabel("ImageInfo","(Press i to change)",10,ypos); ypos+=20;
   bgOpacitySlider = controlP5.addSlider("Background Opacity",0,255,bgOpacity, 10,ypos, 100,20); ypos+=30;
