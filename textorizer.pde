@@ -15,7 +15,8 @@ ControlP5 controlP5;
 ControlWindow controlWindow; // the controls must be in a separate window, since the controls window must refresh constantly, while the rendering window only refreshes when you tell it to.
 
 //String ImageFileName="http://lapin-bleu.net/software/textorizer/textorizer1_2/data/london.jpg";
-String ImageFileName="http://farm1.static.flickr.com/33/59279271_fe73796ca6.jpg";
+//String ImageFileName="http://farm1.static.flickr.com/33/59279271_fe73796ca6.jpg";
+String ImageFileName="59279271_fe73796ca6.jpg";
 //String ImageFileName="http://localhost/gray.png";
 String WordsFileName;
 String fontName="FFScala";
@@ -38,7 +39,7 @@ float maxFontScale=30;
 
 float T2LineHeight=1.0;
 float T2FontSize=14.0;
-float T2ColourAdjustment=0.2;
+float T2ColourAdjustment=0;
 
 
 int originalWidth=500, originalHeight=350; // initial size of the window
@@ -199,7 +200,7 @@ void setup() {
   textorizer2label.setWindow(controlWindow);
   ypos+=20;t2lineHeight=controlP5.addSlider("Line Height",.5,3,T2LineHeight, 10,ypos, 100,20); t2lineHeight.setWindow(controlWindow);
   ypos+=25;t2textSize=controlP5.addSlider("Text Size",4,50,T2FontSize, 10,ypos, 100,20); t2textSize.setWindow(controlWindow);
-  ypos+=25;t2colorAdjustment=controlP5.addSlider("Colour Adjustment",0,1,T2ColourAdjustment, 10,ypos, 100,20); t2colorAdjustment.setWindow(controlWindow);
+  ypos+=25;t2colorAdjustment=controlP5.addSlider("Colour Saturation",0,255,T2ColourAdjustment, 10,ypos, 100,20); t2colorAdjustment.setWindow(controlWindow);
   t2goButton=controlP5.addButton("Textorize2!",4, 240,440, 55,20); t2goButton.setWindow(controlWindow);
 
   t2lineHeight.setId(100);
@@ -523,20 +524,19 @@ void textorize2()
 
 
       if (r+g+b<3*255) { // eliminate white 
-        /*
-        if (T2ColourAdjustment > 0) {
-          // increase the colour's saturation to compensate for mixing with white background 
-          hsv=rgb2hsv(r,g,b); h=hsv['h']; s=hsv['s']; v=hsv['v'];
-          if (s!=0) {
-            s=(s+T2ColourAdjustment)>1.0?1.0:(s+T2ColourAdjustment);
-            rgb=hsv2rgb(h,s,v);
-            r=rgb["r"]; g=rgb["g"]; b=rgb["b"];
-          }
-        }
-        */
-        charToPrint=c;
 
-        fill(r,g,b);
+        charToPrint=c;
+        color charColour = color(r,g,b);
+        if (T2ColourAdjustment>0) {
+          float saturation = saturation(charColour);
+          float newSaturation = (saturation+T2ColourAdjustment)>255?255:(saturation+T2ColourAdjustment);
+          colorMode(HSB,255);
+          fill(hue(charColour), newSaturation, brightness(charColour));
+          colorMode(RGB,255);
+        } else {
+          fill(charColour);
+        }
+
         textSize(T2FontSize*scale);
         text(charToPrint, x, y+T2FontSize*T2LineHeight);
 
