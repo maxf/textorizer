@@ -1,6 +1,6 @@
 TODO
 
-* highlight selected font
 * don't redraw when selecting new font. or redraw whenever a setting is changed
 * allow cancelling the image file selector
 * allow entering URL in image selector
+* gaussian filter on pixel sampling in T2

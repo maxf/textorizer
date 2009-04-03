@@ -48,7 +48,7 @@ int InputWidth, InputHeight; // width of the original picture
 int bgOpacity=30;
 
 // common controls
-Controller bgOpacitySlider, imageNameLabel, wordsTextfield, wordsFileLabel, svgFileLabel, outputImgFileLabel, imageInfoLabel, wordsInfoLabel, outputImgInfoLabel, svgInfoLabel, textorizer1label, textorizer2label, progressSlider;
+Controller bgOpacitySlider, imageNameLabel, wordsTextfield, wordsFileLabel, svgFileLabel, outputImgFileLabel, imageInfoLabel, wordsInfoLabel, outputImgInfoLabel, svgInfoLabel, textorizer1label, textorizer2label, currentFontLabel;
 ScrollList fontSelector;
 
 // textorizer1 controls
@@ -161,9 +161,9 @@ void setup() {
   outputImgFileLabel = controlP5.addTextlabel("Img","PNG output file: "+OutputImageFileName,10,ypos); ypos+=12; 
   outputImgInfoLabel = controlP5.addTextlabel("InfoImg","    (Press o to change)",10,ypos); ypos+=30; 
 
+  currentFontLabel = controlP5.addTextlabel("CurrentFont","Font: "+fontName,10,ypos); ypos+=20; 
 
-
-  fontSelector = controlP5.addScrollList("Font",10,ypos, 200,100); ypos+=110;
+  fontSelector = controlP5.addScrollList("Select Font",10,ypos, 200,100); ypos+=110;
 
   for (int i=0;i<fontList.length;i++) {
     controlP5.Button b=fontSelector.addItem(fontList[i],i);
@@ -178,6 +178,7 @@ void setup() {
   svgInfoLabel.setWindow(controlWindow);
   outputImgFileLabel.setWindow(controlWindow);
   outputImgInfoLabel.setWindow(controlWindow);
+  currentFontLabel.setWindow(controlWindow);
   fontSelector.moveTo(controlWindow);
 
   bgOpacitySlider.setId(3);
@@ -392,6 +393,7 @@ void controlEvent(ControlEvent theEvent) {
     // ---- Font selector control ---
   } else if (id>=1000) {
     fontName=fontList[(int)(theEvent.controller().value())];
+    ((Textlabel)currentFontLabel).setValue("Font: "+fontName);    
     font = createFont(fontName, 32);
     textFont(font);
     redraw();
