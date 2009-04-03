@@ -6,10 +6,6 @@
  * http://www.w3.org/Consortium/Legal/2002/copyright-software-20021231
  */
 
-// TODO: 
-// - color adjust
-// - image export
-
 import controlP5.*;
 import java.util.List;
 import java.io.*;
