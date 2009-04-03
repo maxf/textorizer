@@ -7,7 +7,6 @@
  */
 
 // TODO: 
-// - resize window
 // - color adjust
 // - image export
 
@@ -30,7 +29,7 @@ PFont font;
 List Words;
 int NbWords;
 
-int Mode=0; 
+int Mode=2; 
 // 0: do nothing
 // 1,2,3: textorizer version
 
@@ -41,12 +40,12 @@ float Threshold=100;
 float minFontScale=5;
 float maxFontScale=30;
 
-int T2NbLines=30;
-float T2FontScale=1.0;
+float T2LineHeight=1.0;
+float T2FontSize=14.0;
 float T2ColourAdjustment=0.2;
 
 
-int Width=500, Height=350; // width of the output window
+int originalWidth=500, originalHeight=350; // initial size of the window
 int InputWidth, InputHeight; // width of the original picture
 
 int bgOpacity=30;
@@ -59,7 +58,7 @@ ScrollList fontSelector;
 Controller t1numSlider, t1thresholdSlider, t1minFontSlider, t1maxFontSlider, t1goButton;
 
 // textorizer2 controls
-Controller t2numberLines, t2textSize, t2colorAdjustment, t2goButton;
+Controller t2lineHeight, t2textSize, t2colorAdjustment, t2goButton;
 
 // Sobel convolution filter
 float[][] Sx = {{-1,0,1}, {-2,0,2}, {-1,0,1}};
@@ -118,7 +117,8 @@ void loadImage() {
 void setup() {
   int ypos = 10;
 
-  size(Width, Height); // Size has to be the very first statement, or setup() will be run twice
+  // Size has to be the very first statement, or setup() will be run twice
+  size(originalWidth, originalHeight); 
 
   background(0);
   stroke(1);
@@ -131,6 +131,14 @@ void setup() {
   textFont(font);
 
   frame.setResizable(true);
+  // call draw() when the window is resized
+  frame.addComponentListener(new ComponentAdapter() { 
+    public void componentResized(ComponentEvent e) { 
+      if(e.getSource()==frame) { 
+        redraw();
+      } 
+    } 
+  });
 
   controlP5 = new ControlP5(this);
   controlP5.setAutoDraw(true);
@@ -193,12 +201,12 @@ void setup() {
   // Textorizer 2 controls
   ypos+=40;textorizer2label = controlP5.addTextlabel("Textorizer2","---------------------- Textorizer 2 --------------------", 10,ypos);
   textorizer2label.setWindow(controlWindow);
-  ypos+=20;t2numberLines=controlP5.addSlider("Number of Lines",5,100,T2NbLines, 10,ypos, 100,20);   t2numberLines.setWindow(controlWindow);
-  ypos+=25;t2textSize=controlP5.addSlider("Text Size",0,3,T2FontScale, 10,ypos, 100,20); t2textSize.setWindow(controlWindow);
+  ypos+=20;t2lineHeight=controlP5.addSlider("Line Height",.5,3,T2LineHeight, 10,ypos, 100,20); t2lineHeight.setWindow(controlWindow);
+  ypos+=25;t2textSize=controlP5.addSlider("Text Size",4,50,T2FontSize, 10,ypos, 100,20); t2textSize.setWindow(controlWindow);
   ypos+=25;t2colorAdjustment=controlP5.addSlider("Colour Adjustment",0,1,T2ColourAdjustment, 10,ypos, 100,20); t2colorAdjustment.setWindow(controlWindow);
   t2goButton=controlP5.addButton("Textorize2!",4, 240,440, 55,20); t2goButton.setWindow(controlWindow);
 
-  t2numberLines.setId(100);
+  t2lineHeight.setId(100);
   t2textSize.setId(101);
   t2colorAdjustment.setId(102);
   t2goButton.setId(103);
@@ -254,19 +262,17 @@ void setupFont() {
 
 void setupBgPicture() {
   // background picture
-  float bgScaleX=float(Width)/InputWidth, bgScaleY=float(Height)/InputHeight;
+  float bgScaleX=float(width)/InputWidth, bgScaleY=float(height)/InputHeight;
   pushMatrix();
   scale(bgScaleX, bgScaleY);
   tint(255,bgOpacity);
   image(Image,0,0);
   popMatrix();
-  SvgBuffer.append("<image x='0' y='0' width='"+Width+"' height='"+Height+"' preserveAspectRatio='none' opacity='"+bgOpacity/255.0+"' xlink:href='"+ImageFileName+"'/>\n");
+  SvgBuffer.append("<image x='0' y='0' width='"+width+"' height='"+height+"' preserveAspectRatio='none' opacity='"+bgOpacity/255.0+"' xlink:href='"+ImageFileName+"'/>\n");
 }
 
 void textorize() {
   fill(128);
-  Width=width; Height=height;
-
 
   for (int h=0; h<NStrokes;h++) {
     x=int(random(2,InputWidth-3));
@@ -304,8 +310,8 @@ void textorize() {
         textSize(textScale);
 
         pushMatrix();
-        tx=int(float(x)*Width/InputWidth);
-        ty=int(float(y)*Height/InputHeight);
+        tx=int(float(x)*width/InputWidth);
+        ty=int(float(y)*height/InputHeight);
         r=dir+PI/2;
         word=(String)(Words.get(h%NbWords));
           
@@ -366,9 +372,9 @@ void controlEvent(ControlEvent theEvent) {
     redraw();
     //---- Textorizer 2 controls ---
   } else if (id==100) {
-    T2NbLines = ((int)(theEvent.controller().value()));
+    T2LineHeight = theEvent.controller().value();
   } else if (id==101) {
-    T2FontScale = theEvent.controller().value();
+    T2FontSize = theEvent.controller().value();
   } else if (id==102) {
     T2ColourAdjustment = theEvent.controller().value();
   } else if (id==103) {
@@ -472,7 +478,6 @@ String selectSvgFile() {
 
 void textorize2()
 {
-  float fontSize = T2FontScale * InputHeight / T2NbLines;
   StringBuffer textbuffer = new StringBuffer();
   String text;
 
@@ -481,7 +486,6 @@ void textorize2()
   setupBgPicture();
 
   fill(128);
-  Width=width; Height=height;
 
   textbuffer.append(Words.get(0));
   for (int i=1;i<Words.size();i++) {
@@ -490,35 +494,27 @@ void textorize2()
   }
   text=textbuffer.toString();
 
-  // Nice Bold Fonts:
-  //American Typewriter
-  //Arial Black, Bernard MT condensed, Cooper Black, Futura Condensed Extra Bold, Gill Sans,
-  //Gill Sans Ultra Bold, Haettenschweiler, Helvetica Bold, Impact, Rockwell Bold, Rockwell Extra Bold
-  //Tahoma, Verdana Bold
 
   int nbletters = text.length();
   int ti=0;
-  float realY;
   int y;
   float rx, scale;
   char c, charToPrint;
   color pixel;
+  float imgScaleFactorX = float(Image.width)/width;
+  float imgScaleFactorY = float(Image.height)/height;
 
-  for (int line=0;line<T2NbLines;line++) {
-    realY = Image.height*(line+1.0)/T2NbLines;
-    y= (int)floor(realY-Image.height/(2*T2NbLines));
-
+  for (y=0; y < height; y+=T2FontSize*T2LineHeight) {
     rx=1;
 
-    //    print("ALALA"+text);
     // skip any white space at the beginning of the line
     while (text.charAt(ti%nbletters) == ' ') ti++; 
 
 
-    while (rx<Image.width) {
+    while (rx<width) {
       x=(int)floor(rx)-1;
 
-      pixel = Image.pixels[x+y*InputWidth];
+      pixel = Image.pixels[int(x*imgScaleFactorX) + int(y*imgScaleFactorY)*InputWidth];
       float r=red(pixel), g=green(pixel), b=blue(pixel);
 
       scale=2-brightness(pixel)/255.0;
@@ -545,18 +541,18 @@ void textorize2()
         charToPrint=c;
 
         fill(r,g,b);
-        textSize(fontSize*scale);
-        text(charToPrint, x, realY);
+        textSize(T2FontSize*scale);
+        text(charToPrint, x, y+T2FontSize*T2LineHeight);
 
-        SvgBuffer.append("<text x='"+rx+"' y='"+realY+"' font-size='"+(fontSize*scale)+"' fill='rgb("+int(r)+","+int(g)+","+int(b)+")'>"+charToPrint+"</text>\n");
+        SvgBuffer.append("<text x='"+rx+"' y='"+y+"' font-size='"+(T2FontSize*scale)+"' fill='rgb("+int(r)+","+int(g)+","+int(b)+")'>"+charToPrint+"</text>\n");
         
-        //        rx+=scale*(Float)(CharWidths.get(c))*fontSize;
-        rx+=scale*font.width(c)*fontSize;
+        rx+=scale*font.width(c)*T2FontSize;
         ti++; // next letter 
       } 
-      else // advance one em 
-        //        rx+=scale*(Float)(CharWidths.get('m'))*fontSize;
-        rx+=scale*font.width('m')*fontSize;
+      else {
+        // advance one em 
+        rx+=scale*font.width('m')*T2FontSize;
+      }
     }
   }
 
@@ -565,7 +561,7 @@ void textorize2()
   float innerFrameWidth=2;
   r=(outerFrameWidth-innerFrameWidth)/2;
 
-  SvgBuffer.append("</g>\n<rect x='-"+r+"' y='-"+r+"' width='"+(width+2*r)+"' height='"+(Height+2*r)+"' fill='none' stroke='white' stroke-width='"+(outerFrameWidth+innerFrameWidth)+"'/>\n\n</svg>\n");
+  SvgBuffer.append("</g>\n<rect x='-"+r+"' y='-"+r+"' width='"+(width+2*r)+"' height='"+(height+2*r)+"' fill='none' stroke='white' stroke-width='"+(outerFrameWidth+innerFrameWidth)+"'/>\n\n</svg>\n");
 
   SvgOutput=new String[1];
   SvgOutput[0]=SvgBuffer.toString();
