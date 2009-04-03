@@ -16,7 +16,7 @@ ControlWindow controlWindow; // the controls must be in a separate window, since
 
 //String ImageFileName="http://lapin-bleu.net/software/textorizer/textorizer1_2/data/london.jpg";
 //String ImageFileName="http://farm1.static.flickr.com/33/59279271_fe73796ca6.jpg";
-String ImageFileName="59279271_fe73796ca6.jpg";
+String ImageFileName="jetlag.jpg";
 //String ImageFileName="http://localhost/gray.png";
 String WordsFileName;
 String fontName="FFScala";
