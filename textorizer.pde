@@ -575,7 +575,8 @@ void textorize2()
           float saturation = saturation(charColour);
           float newSaturation = (saturation+T2ColourAdjustment)>255?255:(saturation+T2ColourAdjustment);
           colorMode(HSB,255);
-          fill(hue(charColour), newSaturation, brightness(charColour));
+          charColour = color(hue(charColour), newSaturation, brightness(charColour));
+          fill(charColour);
           colorMode(RGB,255);
         } else {
           fill(charColour);
@@ -584,7 +585,8 @@ void textorize2()
         textSize(T2FontSize*scale);
         text(charToPrint, x, y+T2FontSize*T2LineHeight);
 
-        SvgBuffer.append("<text x='"+rx+"' y='"+y+"' font-size='"+(T2FontSize*scale)+"' fill='rgb("+int(r)+","+int(g)+","+int(b)+")'>"+charToPrint+"</text>\n");
+        r=red(charColour); g=green(charColour); b=blue(charColour);
+        SvgBuffer.append("<text x='"+rx+"' y='"+(y+T2FontSize*T2LineHeight)+"' font-size='"+(T2FontSize*scale)+"' fill='rgb("+int(r)+","+int(g)+","+int(b)+")'>"+charToPrint+"</text>\n");
         
         rx+=scale*font.width(c)*T2FontSize;
         ti++; // next letter 

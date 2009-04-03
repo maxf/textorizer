@@ -1,7 +1,5 @@
 TODO
 
-* image export
-* fix SVG
 * highlight selected font
 * don't redraw when selecting new font. or redraw whenever a setting is changed
 * allow cancelling the image file selector
