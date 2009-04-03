@@ -106,7 +106,7 @@ void loadImage() {
   Image=null;
   while (Image==null || Image.width==-1 || Image.height==-1) {
     while (ImageFileName==null) {
-      ImageFileName=selectFile();
+      ImageFileName=selectFile(ImageFileName);
     }
     Image = loadImage(ImageFileName);
   }
@@ -405,35 +405,27 @@ void keyPressed()
   if(key==',') controlP5.window("controlP5window").hide();
   if(key=='.') controlP5.window("controlP5window").show();
   if(key=='i') {
-    ImageFileName=selectFile();
+    ImageFileName=selectFile(ImageFileName);
     loadImage();
     ((Textlabel)imageNameLabel).setValue("Image: "+ImageFileName);
-    //    controlWindow.update();
-    //    controlWindow.show(); // shouldn't be needed but window won't refresh otherwise
-    redraw();
   }
   if(key=='w') {
-    WordsFileName=selectFile();
+    WordsFileName=selectFile(WordsFileName);
     loadWords();
     ((Textlabel)wordsFileLabel).setValue("Words: "+WordsFileName);
-    //    controlWindow.update();
-    //    controlWindow.show(); // shouldn't be needed but window won't refresh otherwise
-    redraw();
   }
   if (key=='s') {
-    SvgFileName=selectSvgFile();
+    SvgFileName=selectOutputFile(SvgFileName);
     ((Textlabel)svgFileLabel).setValue("SVG output file: "+SvgFileName);
-    redraw();
   }
   if (key=='o') {
-    OutputImageFileName=selectOutPutImageFile();
+    OutputImageFileName=selectOutputFile(OutputImageFileName);
     ((Textlabel)outputImgFileLabel).setValue("PNG output file: "+OutputImageFileName);
-    redraw();
   }
 }
 
 static String currentDirectory;
-String selectFile() {
+String selectFile(String previousFileName) {
   try {
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
   } catch (Exception e) {
@@ -455,11 +447,11 @@ String selectFile() {
   }
   else {
     jfc.hide();
-    return null;
+    return previousFileName;
   }
 }
 
-String selectSvgFile() {
+String selectOutputFile(String previousFileName) {
   try {
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
   } catch (Exception e) {
@@ -475,44 +467,15 @@ String selectSvgFile() {
 
   if (r == JFileChooser.APPROVE_OPTION) {
     File file = jfc.getSelectedFile();
-    SvgFileName=file.getName();
     jfc.hide();
     currentDirectory=jfc.getCurrentDirectory().getPath();
     return file.getPath();
   }
   else {
     jfc.hide();
-    return null;
+    return previousFileName;
   }
 }
-
-String selectOutPutImageFile() {
-  try {
-    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-  } catch (Exception e) {
-    println(e);
-  }
-  JFileChooser jfc;
-  if (currentDirectory != null)
-    jfc = new JFileChooser(currentDirectory);
-  else
-    jfc = new JFileChooser();
-
-  int r = jfc.showSaveDialog(this);
-
-  if (r == JFileChooser.APPROVE_OPTION) {
-    File file = jfc.getSelectedFile();
-    OutputImageFileName=file.getName();
-    jfc.hide();
-    currentDirectory=jfc.getCurrentDirectory().getPath();
-    return file.getPath();
-  }
-  else {
-    jfc.hide();
-    return null;
-  }
-}
-
 
 // %%%%% Textorizer 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
