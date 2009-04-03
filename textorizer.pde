@@ -193,7 +193,7 @@ void setup() {
   ypos+=25; t1minFontSlider  =controlP5.addSlider("Min Font Scale",0,50, minFontScale, 10, ypos, 100,20);
   ypos+=25; t1maxFontSlider  =controlP5.addSlider("Max Font Scale",0,50, maxFontScale, 10,ypos, 100,20);
 
-  t1goButton=controlP5.addButton("Textorize!",4, 240,300, 50,20);
+  t1goButton=controlP5.addButton("Textorize!",4, 240,320, 50,20);
 
   t1numSlider.setId(1); 
   t1numSlider.setWindow(controlWindow);
@@ -213,7 +213,7 @@ void setup() {
   ypos+=20;t2lineHeight=controlP5.addSlider("Line Height",.5,3,T2LineHeight, 10,ypos, 100,20); t2lineHeight.setWindow(controlWindow);
   ypos+=25;t2textSize=controlP5.addSlider("Text Size",4,50,T2FontSize, 10,ypos, 100,20); t2textSize.setWindow(controlWindow);
   ypos+=25;t2colorAdjustment=controlP5.addSlider("Colour Saturation",0,255,T2ColourAdjustment, 10,ypos, 100,20); t2colorAdjustment.setWindow(controlWindow);
-  t2goButton=controlP5.addButton("Textorize2!",4, 240,440, 55,20); t2goButton.setWindow(controlWindow);
+  t2goButton=controlP5.addButton("Textorize2!",4, 240,460, 55,20); t2goButton.setWindow(controlWindow);
 
   t2lineHeight.setId(100);
   t2textSize.setId(101);
@@ -350,7 +350,6 @@ void textorize() {
 
 void controlEvent(ControlEvent theEvent) {
   int id=0;
-
   if (!theEvent.isController()) return;
 
   id=theEvent.controller().id();
@@ -396,7 +395,6 @@ void controlEvent(ControlEvent theEvent) {
     ((Textlabel)currentFontLabel).setValue("Font: "+fontName);    
     font = createFont(fontName, 32);
     textFont(font);
-    redraw();
   } else {
     println("warning: unhandled event on controller: "+id);
   }
