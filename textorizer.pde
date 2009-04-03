@@ -48,7 +48,7 @@ int InputWidth, InputHeight; // width of the original picture
 int bgOpacity=30;
 
 // common controls
-Controller bgOpacitySlider, imageNameLabel, wordsTextfield, wordsFileLabel, svgFileLabel, imageInfoLabel, wordsInfoLabel, svgInfoLabel, textorizer1label, textorizer2label, progressSlider;
+Controller bgOpacitySlider, imageNameLabel, wordsTextfield, wordsFileLabel, svgFileLabel, outputImgFileLabel, imageInfoLabel, wordsInfoLabel, outputImgInfoLabel, svgInfoLabel, textorizer1label, textorizer2label, progressSlider;
 ScrollList fontSelector;
 
 // textorizer1 controls
@@ -62,9 +62,12 @@ float[][] Sx = {{-1,0,1}, {-2,0,2}, {-1,0,1}};
 float[][] Sy = {{-1,-2,-1}, {0,0,0}, {1,2,1}};
 
 // SVG export
-String SvgFileName = "textorizer1_2.svg";
+String SvgFileName = "textorizer.svg";
 StringBuffer SvgBuffer;
 String[] SvgOutput;
+
+// Image export
+String OutputImageFileName = "textorizer.png";
 
 void loadWords() {
   if (WordsFileName==null) {
@@ -148,12 +151,18 @@ void setup() {
   // common controls
   imageNameLabel  = controlP5.addTextlabel("Image","Image: "+ImageFileName, 10,ypos); ypos+=15;
 
-  imageInfoLabel  = controlP5.addTextlabel("ImageInfo","(Press i to change)",10,ypos); ypos+=20;
+  imageInfoLabel  = controlP5.addTextlabel("ImageInfo","    (Press i to change)",10,ypos); ypos+=20;
   bgOpacitySlider = controlP5.addSlider("Background Opacity",0,255,bgOpacity, 10,ypos, 100,20); ypos+=30;
-  wordsFileLabel = controlP5.addTextlabel("Words","Words: "+((WordsFileName==null)?"":WordsFileName), 10,ypos); ypos+=15; 
-  wordsInfoLabel = controlP5.addTextlabel("WordsInfo","(Press w to change)",10,ypos); ypos+=15;
-  svgFileLabel = controlP5.addTextlabel("Svg","SVG output file: "+SvgFileName,10,ypos); ypos+=15; 
-  svgInfoLabel = controlP5.addTextlabel("InfoSVG","(Press s to change)",10,ypos); ypos+=30; 
+  wordsFileLabel = controlP5.addTextlabel("Words","Words: "+((WordsFileName==null)?"":WordsFileName), 10,ypos); ypos+=12; 
+  wordsInfoLabel = controlP5.addTextlabel("WordsInfo","    (Press w to change)",10,ypos); ypos+=15;
+  svgFileLabel = controlP5.addTextlabel("Svg","SVG output file: "+SvgFileName,10,ypos); ypos+=12; 
+  svgInfoLabel = controlP5.addTextlabel("InfoSVG","    (Press s to change)",10,ypos); ypos+=15; 
+
+  outputImgFileLabel = controlP5.addTextlabel("Img","PNG output file: "+OutputImageFileName,10,ypos); ypos+=12; 
+  outputImgInfoLabel = controlP5.addTextlabel("InfoImg","    (Press o to change)",10,ypos); ypos+=30; 
+
+
+
   fontSelector = controlP5.addScrollList("Font",10,ypos, 200,100); ypos+=110;
 
   for (int i=0;i<fontList.length;i++) {
@@ -167,6 +176,8 @@ void setup() {
   wordsInfoLabel.setWindow(controlWindow);
   svgFileLabel.setWindow(controlWindow);
   svgInfoLabel.setWindow(controlWindow);
+  outputImgFileLabel.setWindow(controlWindow);
+  outputImgInfoLabel.setWindow(controlWindow);
   fontSelector.moveTo(controlWindow);
 
   bgOpacitySlider.setId(3);
@@ -235,6 +246,7 @@ void draw()
   controlWindow.update();
   controlP5.draw();
   controlWindow.show();
+  save(OutputImageFileName);
 }
 
 void setupSvg() {
@@ -413,6 +425,11 @@ void keyPressed()
     ((Textlabel)svgFileLabel).setValue("SVG output file: "+SvgFileName);
     redraw();
   }
+  if (key=='o') {
+    OutputImageFileName=selectOutPutImageFile();
+    ((Textlabel)outputImgFileLabel).setValue("PNG output file: "+OutputImageFileName);
+    redraw();
+  }
 }
 
 static String currentDirectory;
@@ -459,6 +476,33 @@ String selectSvgFile() {
   if (r == JFileChooser.APPROVE_OPTION) {
     File file = jfc.getSelectedFile();
     SvgFileName=file.getName();
+    jfc.hide();
+    currentDirectory=jfc.getCurrentDirectory().getPath();
+    return file.getPath();
+  }
+  else {
+    jfc.hide();
+    return null;
+  }
+}
+
+String selectOutPutImageFile() {
+  try {
+    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+  } catch (Exception e) {
+    println(e);
+  }
+  JFileChooser jfc;
+  if (currentDirectory != null)
+    jfc = new JFileChooser(currentDirectory);
+  else
+    jfc = new JFileChooser();
+
+  int r = jfc.showSaveDialog(this);
+
+  if (r == JFileChooser.APPROVE_OPTION) {
+    File file = jfc.getSelectedFile();
+    OutputImageFileName=file.getName();
     jfc.hide();
     currentDirectory=jfc.getCurrentDirectory().getPath();
     return file.getPath();
