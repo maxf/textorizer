@@ -103,15 +103,15 @@ void loadWords() {
 
 
 void loadImage() {
-  Image=null;
-  while (Image==null || Image.width==-1 || Image.height==-1) {
-    while (ImageFileName==null) {
-      ImageFileName=selectFile(ImageFileName);
-    }
-    Image = loadImage(ImageFileName);
+  String newImageFileName = selectFile(ImageFileName);
+  PImage newImage = loadImage(newImageFileName);
+  if (newImage!=null && newImage.width!=-1 && newImage.height!=-1) {
+    ImageFileName=newImageFileName;
+    Image=newImage;
+    InputWidth=Image.width; InputHeight=Image.height;
+    loadPixels(); 
+    ((Textlabel)imageNameLabel).setValue("Image: "+ImageFileName);
   }
-  loadPixels();
-  InputWidth=Image.width; InputHeight=Image.height;
 }
 
 void setup() {
@@ -125,7 +125,11 @@ void setup() {
   fill(0);
   smooth();
   noLoop();
-  loadImage();
+
+  Image = loadImage(ImageFileName);
+  loadPixels();
+  InputWidth=Image.width; InputHeight=Image.height;
+
   loadWords();
   font = createFont(fontName, 32);
   textFont(font);
@@ -405,9 +409,7 @@ void keyPressed()
   if(key==',') controlP5.window("controlP5window").hide();
   if(key=='.') controlP5.window("controlP5window").show();
   if(key=='i') {
-    ImageFileName=selectFile(ImageFileName);
     loadImage();
-    ((Textlabel)imageNameLabel).setValue("Image: "+ImageFileName);
   }
   if(key=='w') {
     WordsFileName=selectFile(WordsFileName);
