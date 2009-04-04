@@ -18,13 +18,12 @@ ControlWindow controlWindow; // the controls must be in a separate window, since
 //String ImageFileName="http://farm1.static.flickr.com/33/59279271_fe73796ca6.jpg";
 String ImageFileName="jetlag.jpg";
 //String ImageFileName="http://localhost/gray.png";
-String WordsFileName;
+String WordsFileName="words.txt";
 String fontName="FFScala";
 
 PImage Image;
 PFont font;
-List Words;
-int NbWords;
+String[] Words;
 
 int Mode=2; 
 // 0: do nothing
@@ -70,35 +69,13 @@ String[] SvgOutput;
 String OutputImageFileName = "textorizer.png";
 
 void loadWords() {
-  if (WordsFileName==null) {
-    Words=new ArrayList(8);
-    Words.add("During the whole of a dull, dark, and soundless day in the");
-    Words.add("autumn of the year, when the clouds hung oppressively low in the");
-    Words.add("heavens, I had been passing alone, on horseback, through a");
-    Words.add("singularly dreary tract of country; and at length found myself,");
-    Words.add("as the shades of the evening drew on, within view of the");
-    Words.add("melancholy House of Usher.  I know not how it was--but, with the");
-    Words.add("first glimpse of the building, a sense of insufferable gloom");
-    Words.add("pervaded my spirit.");
-
-  } else {
-    File file = new File(WordsFileName);
-    try {
-      FileInputStream fis = new FileInputStream(file);
-      DataInputStream dis = new DataInputStream(fis);
-      Words=new ArrayList();
-      while (dis.available() != 0) {
-        Words.add(dis.readLine());
-      }
-      fis.close();
-      dis.close();
-    } catch (java.io.FileNotFoundException e) {
-      Words.add("Error! File Not Found");
-    } catch (java.io.IOException e) {
-      Words.add("Error reading words file");
-    }
+  String newWordsFileName = selectFile(WordsFileName);
+  String[] newWords = loadStrings(newWordsFileName);
+  if (newWords != null) {
+    WordsFileName = newWordsFileName;
+    Words = newWords;
+    ((Textlabel)wordsFileLabel).setValue("Words: " + WordsFileName);
   }
-  NbWords=Words.size();
 }
 
 
@@ -129,8 +106,10 @@ void setup() {
   Image = loadImage(ImageFileName);
   loadPixels();
   InputWidth=Image.width; InputHeight=Image.height;
+  
+  // load the words file
+  Words=loadStrings(WordsFileName);
 
-  loadWords();
   font = createFont(fontName, 32);
   textFont(font);
 
@@ -327,7 +306,7 @@ void textorize() {
         tx=int(float(x)*width/InputWidth);
         ty=int(float(y)*height/InputHeight);
         r=dir+PI/2;
-        word=(String)(Words.get(h%NbWords));
+        word=(String)(Words[h % Words.length]);
           
         // screen output
         translate(tx,ty);
@@ -412,9 +391,7 @@ void keyPressed()
     loadImage();
   }
   if(key=='w') {
-    WordsFileName=selectFile(WordsFileName);
     loadWords();
-    ((Textlabel)wordsFileLabel).setValue("Words: "+WordsFileName);
   }
   if (key=='s') {
     SvgFileName=selectOutputFile(SvgFileName);
@@ -493,10 +470,10 @@ void textorize2()
 
   fill(128);
 
-  textbuffer.append(Words.get(0));
-  for (int i=1;i<Words.size();i++) {
+  textbuffer.append(Words[0]);
+  for (int i=1;i<Words.length;i++) {
     textbuffer.append(' ');
-    textbuffer.append(Words.get(i));
+    textbuffer.append(Words[i]);
   }
   text=textbuffer.toString();
 
