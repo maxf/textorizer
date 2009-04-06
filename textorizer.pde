@@ -551,3 +551,20 @@ void textorize2()
   SvgOutput[0]=SvgBuffer.toString();
   saveStrings(SvgFileName, SvgOutput);
 }
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// return the image's pixel value at x,y, averaged with its 8 neighbours using a sobel filter.
+
+color convolute3(x,y) 
+{
+  color resultR, resultG, resultB;
+  for (int i=0; i<3; i++) {
+    for (int j=0; j<3; j++) {
+      color=Image.pixels[(x+i-1)+InputWidth*(y+j-1)]; // TODO: handle borders
+      resultR+=red(color);
+      resultG+=green(color);
+      resultB+=blue(color);
+    }  
+  }
+  return color(resultR/9, resultG/9, resultB/9);
+}
