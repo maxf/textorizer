@@ -1,5 +1,8 @@
 TODO
 
-* allow entering URL in image selector
+
 * gaussian filter on pixel sampling in T2
 * start with different values for words in t1 and t2 (maybe 2 local files) - maybe text field works in controlp5 now?
+
+* allow entering URL in image selector
+  => won't do. Textfield could be used but you can't paste in it, so not very useful
