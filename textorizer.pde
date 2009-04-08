@@ -15,7 +15,8 @@ ControlP5 controlP5;
 ControlWindow controlWindow; // the controls must be in a separate window, since the controls window must refresh constantly, while the rendering window only refreshes when you tell it to.
 
 String ImageFileName="jetlag.jpg";
-String WordsFileName="words.txt";
+String T1WordsFileName="textorizer.txt";
+String T2TextFileName="textorizer2.txt";
 String fontName="FFScala";
 
 PImage Image;
@@ -44,14 +45,14 @@ int InputWidth, InputHeight; // width of the original picture
 int bgOpacity=30;
 
 // common controls
-Controller bgOpacitySlider, imageNameLabel, wordsTextfield, wordsFileLabel, svgFileLabel, outputImgFileLabel, imageInfoLabel, wordsInfoLabel, outputImgInfoLabel, svgInfoLabel, textorizer1label, textorizer2label, currentFontLabel;
+Controller bgOpacitySlider, imageNameLabel, svgFileLabel, outputImgFileLabel, imageInfoLabel, outputImgInfoLabel, svgInfoLabel, textorizer1label, textorizer2label, currentFontLabel;
 ScrollList fontSelector;
 
 // textorizer1 controls
-Controller t1numSlider, t1thresholdSlider, t1minFontSlider, t1maxFontSlider, t1goButton;
+Controller t1numSlider, t1thresholdSlider, t1minFontSlider, t1maxFontSlider, t1goButton, t1wordsFileName, t1wordsInfoLabel;
 
 // textorizer2 controls
-Controller t2lineHeight, t2textSize, t2colorAdjustment, t2goButton;
+Controller t2lineHeight, t2textSize, t2colorAdjustment, t2goButton, t2textFileName, t2textFileLabel, t2textInfoLabel;
 
 // Sobel convolution filter
 float[][] Sx = {{-1,0,1}, {-2,0,2}, {-1,0,1}};
@@ -65,16 +66,31 @@ String[] SvgOutput;
 // Image export
 String OutputImageFileName = "textorizer.png";
 
-void loadWords() {
-  String newWordsFileName = selectFile(WordsFileName);
-  String[] newWords = loadStrings(newWordsFileName);
-  if (newWords != null) {
-    WordsFileName = newWordsFileName;
-    Words = newWords;
-    ((Textlabel)wordsFileLabel).setValue("Words: " + WordsFileName);
+void loadWords(int mode) {
+  String newWordsFileName;
+  String[] newWords;
+
+  switch(mode) {
+  case 1: // textorizer 1
+    newWordsFileName = selectFile(T1WordsFileName);
+    newWords = loadStrings(newWordsFileName);
+    if (newWords != null) {
+      T1WordsFileName = newWordsFileName;
+      Words = newWords;
+      ((Textlabel)t1wordsFileName).setValue("Words: " + T1WordsFileName);
+    }
+    break;
+  case 2: // textorizer 2
+    newWordsFileName = selectFile(T2TextFileName);
+    newWords = loadStrings(newWordsFileName);
+    if (newWords != null) {
+      T2TextFileName = newWordsFileName;
+      Words = newWords;
+      ((Textlabel)t2textFileName).setValue("Text: " + T2TextFileName);
+    }
+    break;
   }
 }
-
 
 void loadImage() {
   String newImageFileName = selectFile(ImageFileName);
@@ -104,8 +120,8 @@ void setup() {
   loadPixels();
   InputWidth=Image.width; InputHeight=Image.height;
   
-  // load the words file
-  Words=loadStrings(WordsFileName);
+
+
 
   font = createFont(fontName, 32);
   textFont(font);
@@ -131,8 +147,6 @@ void setup() {
 
   imageInfoLabel  = controlP5.addTextlabel("ImageInfo","    (Press i to change)",10,ypos); ypos+=20;
   bgOpacitySlider = controlP5.addSlider("Background Opacity",0,255,bgOpacity, 10,ypos, 100,20); ypos+=30;
-  wordsFileLabel = controlP5.addTextlabel("Words","Words: "+((WordsFileName==null)?"":WordsFileName), 10,ypos); ypos+=12; 
-  wordsInfoLabel = controlP5.addTextlabel("WordsInfo","    (Press w to change)",10,ypos); ypos+=15;
   svgFileLabel = controlP5.addTextlabel("Svg","SVG output file: "+SvgFileName,10,ypos); ypos+=12; 
   svgInfoLabel = controlP5.addTextlabel("InfoSVG","    (Press s to change)",10,ypos); ypos+=15; 
 
@@ -150,8 +164,6 @@ void setup() {
 
   imageNameLabel.setWindow(controlWindow);
   imageInfoLabel.setWindow(controlWindow);
-  wordsFileLabel.setWindow(controlWindow);
-  wordsInfoLabel.setWindow(controlWindow);
   svgFileLabel.setWindow(controlWindow);
   svgInfoLabel.setWindow(controlWindow);
   outputImgFileLabel.setWindow(controlWindow);
@@ -170,6 +182,8 @@ void setup() {
   ypos+=25; t1thresholdSlider=controlP5.addSlider("Threshold",0,200,100, 10,ypos, 100,20);
   ypos+=25; t1minFontSlider  =controlP5.addSlider("Min Font Scale",0,50, minFontScale, 10, ypos, 100,20);
   ypos+=25; t1maxFontSlider  =controlP5.addSlider("Max Font Scale",0,50, maxFontScale, 10,ypos, 100,20);
+  ypos+=30; t1wordsFileName  =controlP5.addTextlabel("Words","Words: "+((T1WordsFileName==null)?"":T1WordsFileName), 10,ypos); 
+  ypos+=12; t1wordsInfoLabel = controlP5.addTextlabel("WordsInfo","    (Press w to change)",10,ypos); ypos+=15;
 
   t1goButton=controlP5.addButton("Textorize!",4, 240,320, 50,20);
 
@@ -181,16 +195,23 @@ void setup() {
   t1minFontSlider.setWindow(controlWindow);
   t1maxFontSlider.setId(5); 
   t1maxFontSlider.setWindow(controlWindow);
+  t1wordsFileName.setWindow(controlWindow);
+  t1wordsInfoLabel.setWindow(controlWindow);
+
   t1goButton.setId(10);
   t1goButton.setWindow(controlWindow);
 
 
   // Textorizer 2 controls
-  ypos+=40;textorizer2label = controlP5.addTextlabel("Textorizer2","---------------------- Textorizer 2 --------------------", 10,ypos);
+  ypos+=30;textorizer2label = controlP5.addTextlabel("Textorizer2","---------------------- Textorizer 2 --------------------", 10,ypos);
   textorizer2label.setWindow(controlWindow);
   ypos+=20;t2lineHeight=controlP5.addSlider("Line Height",.5,3,T2LineHeight, 10,ypos, 100,20); t2lineHeight.setWindow(controlWindow);
   ypos+=25;t2textSize=controlP5.addSlider("Text Size",4,50,T2FontSize, 10,ypos, 100,20); t2textSize.setWindow(controlWindow);
   ypos+=25;t2colorAdjustment=controlP5.addSlider("Colour Saturation",0,255,T2ColourAdjustment, 10,ypos, 100,20); t2colorAdjustment.setWindow(controlWindow);
+  ypos+=30; t2textFileName  =controlP5.addTextlabel("Text","Text: "+((T2TextFileName==null)?"":T2TextFileName), 10,ypos); t2textFileName.setWindow(controlWindow);
+  ypos+=12; t2textInfoLabel = controlP5.addTextlabel("TextInfo","    (Press t to change)",10,ypos); t2textInfoLabel.setWindow(controlWindow);
+
+
   t2goButton=controlP5.addButton("Textorize2!",4, 240,460, 55,20); t2goButton.setWindow(controlWindow);
 
   t2lineHeight.setId(100);
@@ -260,6 +281,7 @@ void setupBgPicture() {
 
 void textorize() {
   fill(128);
+  Words=loadStrings(T1WordsFileName);
 
   for (int h=0; h<NStrokes;h++) {
     x=int(random(2,InputWidth-3));
@@ -383,7 +405,10 @@ void keyPressed()
     loadImage();
   }
   if(key=='w') {
-    loadWords();
+    loadWords(1);
+  }
+  if(key=='t') {
+    loadWords(2);
   }
   if (key=='s') {
     SvgFileName=selectOutputFile(SvgFileName);
@@ -459,7 +484,7 @@ void textorize2()
   setupSvg();
   setupFont();
   setupBgPicture();
-
+  Words=loadStrings(T2TextFileName);
   fill(128);
 
   textbuffer.append(Words[0]);
