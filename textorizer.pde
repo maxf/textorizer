@@ -497,7 +497,8 @@ void textorize2()
     while (rx<width) {
       x=(int)floor(rx)-1;
 
-      pixel = Image.pixels[int(x*imgScaleFactorX) + int(y*imgScaleFactorY)*InputWidth];
+      pixel = pixelAverageAt(int(x*imgScaleFactorX), int(y*imgScaleFactorY), 1);
+
       float r=red(pixel), g=green(pixel), b=blue(pixel);
 
       scale=2-brightness(pixel)/255.0;
@@ -553,18 +554,23 @@ void textorize2()
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// return the image's pixel value at x,y, averaged with its 8 neighbours using a sobel filter.
+// return the image's pixel value at x,y, averaged with its radiusXradius neighbours.
 
-color convolute3(x,y) 
+color pixelAverageAt(int x, int y, int radius) 
 {
-  color resultR, resultG, resultB;
-  for (int i=0; i<3; i++) {
-    for (int j=0; j<3; j++) {
-      color=Image.pixels[(x+i-1)+InputWidth*(y+j-1)]; // TODO: handle borders
-      resultR+=red(color);
-      resultG+=green(color);
-      resultB+=blue(color);
-    }  
+  color pixel;
+  float resultR=0.0, resultG=0.0, resultB=0.0;
+  int count=0;
+  for (int i=-radius; i<=radius; i++) {
+    for (int j=-radius; j<=radius; j++) {
+      if (x+i>=0 && x+i<InputWidth && y+j>=0 && y+j<InputHeight) {
+        count++;
+        pixel=Image.pixels[(x+i)+InputWidth*(y+j)]; 
+        resultR+=red(pixel);
+        resultG+=green(pixel);
+        resultB+=blue(pixel);
+      }
+    }
   }
-  return color(resultR/9, resultG/9, resultB/9);
+  return color(resultR/count, resultG/count, resultB/count);
 }
