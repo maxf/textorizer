@@ -1,8 +1,13 @@
 TODO
 
+* crash when changing text file for T2
+* hide buttons when rendering and also change labels to "RENDERING" or something
 
-* gaussian filter on pixel sampling in T2
-* start with different values for words in t1 and t2 (maybe 2 local files) - maybe text field works in controlp5 now?
+
+DONE
 
 * allow entering URL in image selector
   => won't do. Textfield could be used but you can't paste in it, so not very useful
+* pixel averaging on T2 (7de4794e21448b519a3df840ebc9c48069633933)
+* start with different values for words in t1 and t2 (maybe 2 local files) - maybe text field works in controlp5 now? (dbc4b30b19a59c0c66c83693a594be78ef2eeca8)
+
