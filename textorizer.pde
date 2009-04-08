@@ -14,10 +14,7 @@ import javax.swing.*;
 ControlP5 controlP5;
 ControlWindow controlWindow; // the controls must be in a separate window, since the controls window must refresh constantly, while the rendering window only refreshes when you tell it to.
 
-//String ImageFileName="http://lapin-bleu.net/software/textorizer/textorizer1_2/data/london.jpg";
-//String ImageFileName="http://farm1.static.flickr.com/33/59279271_fe73796ca6.jpg";
 String ImageFileName="jetlag.jpg";
-//String ImageFileName="http://localhost/gray.png";
 String WordsFileName="words.txt";
 String fontName="FFScala";
 
@@ -129,8 +126,6 @@ void setup() {
   controlWindow.setBackground(color(40));
   controlWindow.setUpdateMode(ControlWindow.NORMAL);
 
-  //  progressSlider = controlP5.addSlider("Progress",0,100,42, 10,ypos, 100,20); ypos+=30; progressSlider.setWindow(controlWindow);
-
   // common controls
   imageNameLabel  = controlP5.addTextlabel("Image","Image: "+ImageFileName, 10,ypos); ypos+=15;
 
@@ -225,7 +220,6 @@ void draw()
     case 2: textorize2(); break;
     }
   }
-  //  fill(120);
   cursor(ARROW);
   controlWindow.update();
   controlP5.draw();
@@ -321,8 +315,6 @@ void textorize() {
 
       }
   }
-  //  controlWindow.show(); 
-  //  controlP5.draw();
 
   SvgBuffer.append("</g>\n</svg>\n");
   SvgOutput=new String[1];
@@ -504,8 +496,6 @@ void textorize2()
       scale=2-brightness(pixel)/255.0;
       c=text.charAt(ti%nbletters);
 
-      //      if (c < ' ' || c > '~') 
-      //        c='?'; // we only support ascii :-(
       if (c > font.width.length)
         c='?'; // the font doesn't support this character
 
