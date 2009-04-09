@@ -2,6 +2,7 @@ TODO
 
 * crash when changing text file for T2
 * hide buttons when rendering and also change labels to "RENDERING" or something
+* transparency in rendered text in t1 to avoid http://ffffound.com/image/5f2c347b450b3e70dcf3a0c977adca70b4afc8c8 ?
 
 
 DONE
