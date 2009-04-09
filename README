@@ -1,7 +1,6 @@
 TODO
 
-* crash when changing text file for T2
-* hide buttons when rendering and also change labels to "RENDERING" or something
+* font advance in T2 screwed up after running t1
 * transparency in rendered text in t1 to avoid http://ffffound.com/image/5f2c347b450b3e70dcf3a0c977adca70b4afc8c8 ?
 
 
@@ -11,4 +10,6 @@ DONE
   => won't do. Textfield could be used but you can't paste in it, so not very useful
 * pixel averaging on T2 (7de4794e21448b519a3df840ebc9c48069633933)
 * start with different values for words in t1 and t2 (maybe 2 local files) - maybe text field works in controlp5 now? (dbc4b30b19a59c0c66c83693a594be78ef2eeca8)
-
+* crash when changing text file for T2
+  => won't fix - only happens when file is huge and it's a Java memory issue
+* hide buttons when rendering and also change labels to "RENDERING" or something (9e1ee567ad01063ba40f91fe0e30536d1d14811a)
