@@ -19,6 +19,11 @@ String T1WordsFileName="textorizer.txt";
 String T2TextFileName="textorizer2.txt";
 String fontName="FFScala";
 
+String t1SeparatorStringIdle=   "---------------------- Textorizer 1 --------------------";
+String t2SeparatorStringIdle=   "---------------------- Textorizer 2 --------------------";
+String t1SeparatorStringRunning="----------------------- RENDERING ---------------------";
+String t2SeparatorStringRunning="----------------------- RENDERING ---------------------";
+
 PImage Image;
 PFont font;
 String[] Words;
@@ -176,7 +181,7 @@ void setup() {
   bgOpacitySlider.setWindow(controlWindow);
 
   // Textorizer 1 controls
-  textorizer1label = controlP5.addTextlabel("Textorizer1","---------------------- Textorizer 1 --------------------", 10,ypos);
+  textorizer1label = controlP5.addTextlabel("Textorizer1",t1SeparatorStringIdle, 10,ypos);
   textorizer1label.setWindow(controlWindow);
   ypos+=20; t1numSlider=controlP5.addSlider("Number of Strokes",100,10000,1000, 10, ypos, 100,20);
   ypos+=25; t1thresholdSlider=controlP5.addSlider("Threshold",0,200,100, 10,ypos, 100,20);
@@ -203,7 +208,7 @@ void setup() {
 
 
   // Textorizer 2 controls
-  ypos+=30;textorizer2label = controlP5.addTextlabel("Textorizer2","---------------------- Textorizer 2 --------------------", 10,ypos);
+  ypos+=30;textorizer2label = controlP5.addTextlabel("Textorizer2",t2SeparatorStringIdle, 10,ypos);
   textorizer2label.setWindow(controlWindow);
   ypos+=20;t2lineHeight=controlP5.addSlider("Line Height",.5,3,T2LineHeight, 10,ypos, 100,20); t2lineHeight.setWindow(controlWindow);
   ypos+=25;t2textSize=controlP5.addSlider("Text Size",4,50,T2FontSize, 10,ypos, 100,20); t2textSize.setWindow(controlWindow);
@@ -212,7 +217,7 @@ void setup() {
   ypos+=12; t2textInfoLabel = controlP5.addTextlabel("TextInfo","    (Press t to change)",10,ypos); t2textInfoLabel.setWindow(controlWindow);
 
 
-  t2goButton=controlP5.addButton("Textorize2!",4, 240,460, 55,20); t2goButton.setWindow(controlWindow);
+  t2goButton=controlP5.addButton("Textorize2!",4, 235,490, 55,20); t2goButton.setWindow(controlWindow);
 
   t2lineHeight.setId(100);
   t2textSize.setId(101);
@@ -227,7 +232,11 @@ String word;
 
 void draw()
 {
-  controlWindow.hide();
+  t1goButton.hide(); t2goButton.hide();
+  ((Textlabel)textorizer1label).setValue(t1SeparatorStringRunning);    
+  ((Textlabel)textorizer2label).setValue(t2SeparatorStringRunning);    
+
+
   cursor(WAIT);
   background(255);
 
@@ -244,8 +253,11 @@ void draw()
   cursor(ARROW);
   controlWindow.update();
   controlP5.draw();
-  controlWindow.show();
   save(OutputImageFileName);
+
+  t1goButton.show(); t2goButton.show();
+  ((Textlabel)textorizer1label).setValue(t1SeparatorStringIdle);    
+  ((Textlabel)textorizer2label).setValue(t2SeparatorStringIdle);    
 }
 
 void setupSvg() {
