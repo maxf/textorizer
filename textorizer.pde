@@ -270,6 +270,7 @@ void setupFont() {
     SvgBuffer.append("<g style='font-family:"+fontName+";font-size:32' text-anchor='middle'>\n");
     break;
   case 2:
+    textAlign(LEFT);
     SvgBuffer.append("<g style='font-family:"+fontName+";font-size:32'>\n");
     break;
   }
@@ -511,8 +512,8 @@ void textorize2()
 
   int nbletters = text.length();
   int ti=0;
-  int y;
-  float rx, scale;
+  int x,y;
+  float rx, scale, r,g,b;
   char c, charToPrint;
   color pixel;
   float imgScaleFactorX = float(Image.width)/width;
@@ -530,7 +531,7 @@ void textorize2()
 
       pixel = pixelAverageAt(int(x*imgScaleFactorX), int(y*imgScaleFactorY), 1);
 
-      float r=red(pixel), g=green(pixel), b=blue(pixel);
+      r=red(pixel); g=green(pixel); b=blue(pixel);
 
       scale=2-brightness(pixel)/255.0;
       c=text.charAt(ti%nbletters);
