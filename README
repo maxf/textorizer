@@ -1,7 +1,7 @@
 TODO
 
-* font advance in T2 screwed up after running t1
 * transparency in rendered text in t1 to avoid http://ffffound.com/image/5f2c347b450b3e70dcf3a0c977adca70b4afc8c8 ?
+* different windows for t1/t2/common settings
 
 
 DONE
@@ -13,3 +13,4 @@ DONE
 * crash when changing text file for T2
   => won't fix - only happens when file is huge and it's a Java memory issue
 * hide buttons when rendering and also change labels to "RENDERING" or something (9e1ee567ad01063ba40f91fe0e30536d1d14811a)
+* font advance in T2 screwed up after running t1 (fixed: bf6b72a)
