@@ -14,12 +14,15 @@ import javax.swing.*;
 ControlP5 controlP5;
 ControlWindow controlWindow; // the controls must be in a separate window, since the controls window must refresh constantly, while the rendering window only refreshes when you tell it to.
 
-//String ImageFileName="http://lapin-bleu.net/software/textorizer/textorizer1_2/data/london.jpg";
-//String ImageFileName="http://farm1.static.flickr.com/33/59279271_fe73796ca6.jpg";
 String ImageFileName="jetlag.jpg";
-//String ImageFileName="http://localhost/gray.png";
-String WordsFileName="words.txt";
+String T1WordsFileName="textorizer.txt";
+String T2TextFileName="textorizer2.txt";
 String fontName="FFScala";
+
+String t1SeparatorStringIdle=   "---------------------- Textorizer 1 --------------------";
+String t2SeparatorStringIdle=   "---------------------- Textorizer 2 --------------------";
+String t1SeparatorStringRunning="----------------------- RENDERING ---------------------";
+String t2SeparatorStringRunning="----------------------- RENDERING ---------------------";
 
 PImage Image;
 PFont font;
@@ -47,14 +50,14 @@ int InputWidth, InputHeight; // width of the original picture
 int bgOpacity=30;
 
 // common controls
-Controller bgOpacitySlider, imageNameLabel, wordsTextfield, wordsFileLabel, svgFileLabel, outputImgFileLabel, imageInfoLabel, wordsInfoLabel, outputImgInfoLabel, svgInfoLabel, textorizer1label, textorizer2label, currentFontLabel;
+Controller bgOpacitySlider, imageNameLabel, svgFileLabel, outputImgFileLabel, imageInfoLabel, outputImgInfoLabel, svgInfoLabel, textorizer1label, textorizer2label, currentFontLabel;
 ScrollList fontSelector;
 
 // textorizer1 controls
-Controller t1numSlider, t1thresholdSlider, t1minFontSlider, t1maxFontSlider, t1goButton;
+Controller t1numSlider, t1thresholdSlider, t1minFontSlider, t1maxFontSlider, t1goButton, t1wordsFileName, t1wordsInfoLabel;
 
 // textorizer2 controls
-Controller t2lineHeight, t2textSize, t2colorAdjustment, t2goButton;
+Controller t2lineHeight, t2textSize, t2colorAdjustment, t2goButton, t2textFileName, t2textFileLabel, t2textInfoLabel;
 
 // Sobel convolution filter
 float[][] Sx = {{-1,0,1}, {-2,0,2}, {-1,0,1}};
@@ -68,16 +71,31 @@ String[] SvgOutput;
 // Image export
 String OutputImageFileName = "textorizer.png";
 
-void loadWords() {
-  String newWordsFileName = selectFile(WordsFileName);
-  String[] newWords = loadStrings(newWordsFileName);
-  if (newWords != null) {
-    WordsFileName = newWordsFileName;
-    Words = newWords;
-    ((Textlabel)wordsFileLabel).setValue("Words: " + WordsFileName);
+void loadWords(int mode) {
+  String newWordsFileName;
+  String[] newWords;
+
+  switch(mode) {
+  case 1: // textorizer 1
+    newWordsFileName = selectFile(T1WordsFileName);
+    newWords = loadStrings(newWordsFileName);
+    if (newWords != null) {
+      T1WordsFileName = newWordsFileName;
+      Words = newWords;
+      ((Textlabel)t1wordsFileName).setValue("Words: " + T1WordsFileName);
+    }
+    break;
+  case 2: // textorizer 2
+    newWordsFileName = selectFile(T2TextFileName);
+    newWords = loadStrings(newWordsFileName);
+    if (newWords != null) {
+      T2TextFileName = newWordsFileName;
+      Words = newWords;
+      ((Textlabel)t2textFileName).setValue("Text: " + T2TextFileName);
+    }
+    break;
   }
 }
-
 
 void loadImage() {
   String newImageFileName = selectFile(ImageFileName);
@@ -107,8 +125,8 @@ void setup() {
   loadPixels();
   InputWidth=Image.width; InputHeight=Image.height;
   
-  // load the words file
-  Words=loadStrings(WordsFileName);
+
+
 
   font = createFont(fontName, 32);
   textFont(font);
@@ -129,15 +147,11 @@ void setup() {
   controlWindow.setBackground(color(40));
   controlWindow.setUpdateMode(ControlWindow.NORMAL);
 
-  //  progressSlider = controlP5.addSlider("Progress",0,100,42, 10,ypos, 100,20); ypos+=30; progressSlider.setWindow(controlWindow);
-
   // common controls
   imageNameLabel  = controlP5.addTextlabel("Image","Image: "+ImageFileName, 10,ypos); ypos+=15;
 
   imageInfoLabel  = controlP5.addTextlabel("ImageInfo","    (Press i to change)",10,ypos); ypos+=20;
   bgOpacitySlider = controlP5.addSlider("Background Opacity",0,255,bgOpacity, 10,ypos, 100,20); ypos+=30;
-  wordsFileLabel = controlP5.addTextlabel("Words","Words: "+((WordsFileName==null)?"":WordsFileName), 10,ypos); ypos+=12; 
-  wordsInfoLabel = controlP5.addTextlabel("WordsInfo","    (Press w to change)",10,ypos); ypos+=15;
   svgFileLabel = controlP5.addTextlabel("Svg","SVG output file: "+SvgFileName,10,ypos); ypos+=12; 
   svgInfoLabel = controlP5.addTextlabel("InfoSVG","    (Press s to change)",10,ypos); ypos+=15; 
 
@@ -155,8 +169,6 @@ void setup() {
 
   imageNameLabel.setWindow(controlWindow);
   imageInfoLabel.setWindow(controlWindow);
-  wordsFileLabel.setWindow(controlWindow);
-  wordsInfoLabel.setWindow(controlWindow);
   svgFileLabel.setWindow(controlWindow);
   svgInfoLabel.setWindow(controlWindow);
   outputImgFileLabel.setWindow(controlWindow);
@@ -169,12 +181,14 @@ void setup() {
   bgOpacitySlider.setWindow(controlWindow);
 
   // Textorizer 1 controls
-  textorizer1label = controlP5.addTextlabel("Textorizer1","---------------------- Textorizer 1 --------------------", 10,ypos);
+  textorizer1label = controlP5.addTextlabel("Textorizer1",t1SeparatorStringIdle, 10,ypos);
   textorizer1label.setWindow(controlWindow);
   ypos+=20; t1numSlider=controlP5.addSlider("Number of Strokes",100,10000,1000, 10, ypos, 100,20);
   ypos+=25; t1thresholdSlider=controlP5.addSlider("Threshold",0,200,100, 10,ypos, 100,20);
   ypos+=25; t1minFontSlider  =controlP5.addSlider("Min Font Scale",0,50, minFontScale, 10, ypos, 100,20);
   ypos+=25; t1maxFontSlider  =controlP5.addSlider("Max Font Scale",0,50, maxFontScale, 10,ypos, 100,20);
+  ypos+=30; t1wordsFileName  =controlP5.addTextlabel("Words","Words: "+((T1WordsFileName==null)?"":T1WordsFileName), 10,ypos); 
+  ypos+=12; t1wordsInfoLabel = controlP5.addTextlabel("WordsInfo","    (Press w to change)",10,ypos); ypos+=15;
 
   t1goButton=controlP5.addButton("Textorize!",4, 240,320, 50,20);
 
@@ -186,17 +200,24 @@ void setup() {
   t1minFontSlider.setWindow(controlWindow);
   t1maxFontSlider.setId(5); 
   t1maxFontSlider.setWindow(controlWindow);
+  t1wordsFileName.setWindow(controlWindow);
+  t1wordsInfoLabel.setWindow(controlWindow);
+
   t1goButton.setId(10);
   t1goButton.setWindow(controlWindow);
 
 
   // Textorizer 2 controls
-  ypos+=40;textorizer2label = controlP5.addTextlabel("Textorizer2","---------------------- Textorizer 2 --------------------", 10,ypos);
+  ypos+=30;textorizer2label = controlP5.addTextlabel("Textorizer2",t2SeparatorStringIdle, 10,ypos);
   textorizer2label.setWindow(controlWindow);
   ypos+=20;t2lineHeight=controlP5.addSlider("Line Height",.5,3,T2LineHeight, 10,ypos, 100,20); t2lineHeight.setWindow(controlWindow);
   ypos+=25;t2textSize=controlP5.addSlider("Text Size",4,50,T2FontSize, 10,ypos, 100,20); t2textSize.setWindow(controlWindow);
   ypos+=25;t2colorAdjustment=controlP5.addSlider("Colour Saturation",0,255,T2ColourAdjustment, 10,ypos, 100,20); t2colorAdjustment.setWindow(controlWindow);
-  t2goButton=controlP5.addButton("Textorize2!",4, 240,460, 55,20); t2goButton.setWindow(controlWindow);
+  ypos+=30; t2textFileName  =controlP5.addTextlabel("Text","Text: "+((T2TextFileName==null)?"":T2TextFileName), 10,ypos); t2textFileName.setWindow(controlWindow);
+  ypos+=12; t2textInfoLabel = controlP5.addTextlabel("TextInfo","    (Press t to change)",10,ypos); t2textInfoLabel.setWindow(controlWindow);
+
+
+  t2goButton=controlP5.addButton("Textorize2!",4, 235,490, 55,20); t2goButton.setWindow(controlWindow);
 
   t2lineHeight.setId(100);
   t2textSize.setId(101);
@@ -204,14 +225,13 @@ void setup() {
   t2goButton.setId(103);
 }
 
-int x,y,tx,ty;
-float dx,dy,dmag2,vnear,b,textScale,dir,r;
-color v,p;
-String word;
-
 void draw()
 {
-  controlWindow.hide();
+  t1goButton.hide(); t2goButton.hide();
+  ((Textlabel)textorizer1label).setValue(t1SeparatorStringRunning);    
+  ((Textlabel)textorizer2label).setValue(t2SeparatorStringRunning);    
+
+
   cursor(WAIT);
   background(255);
 
@@ -225,12 +245,14 @@ void draw()
     case 2: textorize2(); break;
     }
   }
-  //  fill(120);
   cursor(ARROW);
   controlWindow.update();
   controlP5.draw();
-  controlWindow.show();
   save(OutputImageFileName);
+
+  t1goButton.show(); t2goButton.show();
+  ((Textlabel)textorizer1label).setValue(t1SeparatorStringIdle);    
+  ((Textlabel)textorizer2label).setValue(t2SeparatorStringIdle);    
 }
 
 void setupSvg() {
@@ -248,6 +270,7 @@ void setupFont() {
     SvgBuffer.append("<g style='font-family:"+fontName+";font-size:32' text-anchor='middle'>\n");
     break;
   case 2:
+    textAlign(LEFT);
     SvgBuffer.append("<g style='font-family:"+fontName+";font-size:32'>\n");
     break;
   }
@@ -264,8 +287,15 @@ void setupBgPicture() {
   SvgBuffer.append("<image x='0' y='0' width='"+width+"' height='"+height+"' preserveAspectRatio='none' opacity='"+bgOpacity/255.0+"' xlink:href='"+ImageFileName+"'/>\n");
 }
 
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 void textorize() {
+  int x,y,tx,ty;
+  float dx,dy,dmag2,vnear,b,textScale,dir,r;
+  color v,p;
+  String word;
+    
   fill(128);
+  Words=loadStrings(T1WordsFileName);
 
   for (int h=0; h<NStrokes;h++) {
     x=int(random(2,InputWidth-3));
@@ -273,63 +303,62 @@ void textorize() {
     v=Image.pixels[x+y*InputWidth];
 
     fill(v);
-      dx=dy=0;
-      for (int i=0; i<3; i++) {
-        for (int j=0; j<3; j++) {
-          p=Image.pixels[(x+i-1)+InputWidth*(y+j-1)];
-          vnear=brightness(p);
-          dx += Sx[j][i] * vnear;
-          dy += Sy[j][i] * vnear;
-        }  
-      }
-      dx/=8; dy/=8;
-
-      dmag2=dx*dx + dy*dy;
-
-      if (dmag2 > Threshold) {
-        b = 2*(InputWidth + InputHeight) / 5000.0;
-        textScale=minFontScale+sqrt(dmag2)*maxFontScale/80;
-        if (dx==0)
-          dir=PI/2;
-        else if (dx > 0)
-          dir=atan(dy/dx);
-        else 
-          if (dy==0) 
-            dir=0;
-          else if (dy > 0)
-            dir=atan(-dx/dy)+PI/2;
-          else
-            dir=atan(dy/dx)+PI;
-        textSize(textScale);
-
-        pushMatrix();
-        tx=int(float(x)*width/InputWidth);
-        ty=int(float(y)*height/InputHeight);
-        r=dir+PI/2;
-        word=(String)(Words[h % Words.length]);
-          
-        // screen output
-        translate(tx,ty);
-        rotate(r);
-        fill(v);
-        text(word, 0,0);
-        stroke(1.0,0.,0.);
-        popMatrix();
-
-        // SVG output
-        SvgBuffer.append("<text transform='translate("+tx+","+ty+") scale("+textScale/15.0+") rotate("+r*180/PI+")' fill='rgb("+int(red(v))+","+int(green(v))+","+int(blue(v))+")'>"+word+"</text>\n");
-
-      }
+    dx=dy=0;
+    for (int i=0; i<3; i++) {
+      for (int j=0; j<3; j++) {
+        p=Image.pixels[(x+i-1)+InputWidth*(y+j-1)];
+        vnear=brightness(p);
+        dx += Sx[j][i] * vnear;
+        dy += Sy[j][i] * vnear;
+      }  
+    }
+    dx/=8; dy/=8;
+    
+    dmag2=dx*dx + dy*dy;
+    
+    if (dmag2 > Threshold) {
+      b = 2*(InputWidth + InputHeight) / 5000.0;
+      textScale=minFontScale+sqrt(dmag2)*maxFontScale/80;
+      if (dx==0)
+        dir=PI/2;
+      else if (dx > 0)
+        dir=atan(dy/dx);
+      else 
+        if (dy==0) 
+          dir=0;
+        else if (dy > 0)
+          dir=atan(-dx/dy)+PI/2;
+        else
+          dir=atan(dy/dx)+PI;
+      textSize(textScale);
+      
+      pushMatrix();
+      tx=int(float(x)*width/InputWidth);
+      ty=int(float(y)*height/InputHeight);
+      r=dir+PI/2;
+      word=(String)(Words[h % Words.length]);
+      
+      // screen output
+      translate(tx,ty);
+      rotate(r);
+      fill(v);
+      text(word, 0,0);
+      stroke(1.0,0.,0.);
+      popMatrix();
+      
+      // SVG output
+      SvgBuffer.append("<text transform='translate("+tx+","+ty+") scale("+textScale/15.0+") rotate("+r*180/PI+")' fill='rgb("+int(red(v))+","+int(green(v))+","+int(blue(v))+")'>"+word+"</text>\n");
+      
+    }
   }
-  //  controlWindow.show(); 
-  //  controlP5.draw();
-
+  
   SvgBuffer.append("</g>\n</svg>\n");
   SvgOutput=new String[1];
   SvgOutput[0]=SvgBuffer.toString();
   saveStrings(SvgFileName, SvgOutput);
 }
 
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void controlEvent(ControlEvent theEvent) {
   int id=0;
@@ -391,7 +420,10 @@ void keyPressed()
     loadImage();
   }
   if(key=='w') {
-    loadWords();
+    loadWords(1);
+  }
+  if(key=='t') {
+    loadWords(2);
   }
   if (key=='s') {
     SvgFileName=selectOutputFile(SvgFileName);
@@ -467,7 +499,7 @@ void textorize2()
   setupSvg();
   setupFont();
   setupBgPicture();
-
+  Words=loadStrings(T2TextFileName);
   fill(128);
 
   textbuffer.append(Words[0]);
@@ -480,8 +512,8 @@ void textorize2()
 
   int nbletters = text.length();
   int ti=0;
-  int y;
-  float rx, scale;
+  int x,y;
+  float rx, scale, r,g,b;
   char c, charToPrint;
   color pixel;
   float imgScaleFactorX = float(Image.width)/width;
@@ -497,14 +529,13 @@ void textorize2()
     while (rx<width) {
       x=(int)floor(rx)-1;
 
-      pixel = Image.pixels[int(x*imgScaleFactorX) + int(y*imgScaleFactorY)*InputWidth];
-      float r=red(pixel), g=green(pixel), b=blue(pixel);
+      pixel = pixelAverageAt(int(x*imgScaleFactorX), int(y*imgScaleFactorY), 1);
+
+      r=red(pixel); g=green(pixel); b=blue(pixel);
 
       scale=2-brightness(pixel)/255.0;
       c=text.charAt(ti%nbletters);
 
-      //      if (c < ' ' || c > '~') 
-      //        c='?'; // we only support ascii :-(
       if (c > font.width.length)
         c='?'; // the font doesn't support this character
 
@@ -553,18 +584,23 @@ void textorize2()
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// return the image's pixel value at x,y, averaged with its 8 neighbours using a sobel filter.
+// return the image's pixel value at x,y, averaged with its radiusXradius neighbours.
 
-color convolute3(x,y) 
+color pixelAverageAt(int x, int y, int radius) 
 {
-  color resultR, resultG, resultB;
-  for (int i=0; i<3; i++) {
-    for (int j=0; j<3; j++) {
-      color=Image.pixels[(x+i-1)+InputWidth*(y+j-1)]; // TODO: handle borders
-      resultR+=red(color);
-      resultG+=green(color);
-      resultB+=blue(color);
-    }  
+  color pixel;
+  float resultR=0.0, resultG=0.0, resultB=0.0;
+  int count=0;
+  for (int i=-radius; i<=radius; i++) {
+    for (int j=-radius; j<=radius; j++) {
+      if (x+i>=0 && x+i<InputWidth && y+j>=0 && y+j<InputHeight) {
+        count++;
+        pixel=Image.pixels[(x+i)+InputWidth*(y+j)]; 
+        resultR+=red(pixel);
+        resultG+=green(pixel);
+        resultB+=blue(pixel);
+      }
+    }
   }
-  return color(resultR/9, resultG/9, resultB/9);
+  return color(resultR/count, resultG/count, resultB/count);
 }
