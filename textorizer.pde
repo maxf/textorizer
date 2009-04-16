@@ -1,4 +1,4 @@
-/* textorizer1_2: vectorises a picture into an SVG using text strings
+/* textorizer12: vectorises a picture into an SVG using text strings
  * see: http://lapin-bleu.net/software/textorizer
  * Copyright Max Froumentin 2009
  * This software is distributed under the
@@ -105,6 +105,8 @@ void loadImage() {
     Image=newImage;
     InputWidth=Image.width; InputHeight=Image.height;
     loadPixels(); 
+    size(Image.width, Image.height); 
+    frame.setSize(Image.width, Image.height); 
     ((Textlabel)imageNameLabel).setValue("Image: "+ImageFileName);
   }
 }
