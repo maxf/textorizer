@@ -50,14 +50,14 @@ int InputWidth, InputHeight; // width of the original picture
 int bgOpacity=30;
 
 // common controls
-Controller bgOpacitySlider, imageNameLabel, svgFileLabel, outputImgFileLabel, imageInfoLabel, outputImgInfoLabel, svgInfoLabel, textorizer1label, textorizer2label, currentFontLabel;
+Controller bgOpacitySlider, imageNameLabel, svgFileLabel, outputImgFileLabel, changeImageButton, outputImageChangeButton, svgChangeButton, textorizer1label, textorizer2label, currentFontLabel;
 ScrollList fontSelector;
 
 // textorizer1 controls
-Controller t1numSlider, t1thresholdSlider, t1minFontSlider, t1maxFontSlider, t1goButton, t1wordsFileName, t1wordsInfoLabel;
+Controller t1numSlider, t1thresholdSlider, t1minFontSlider, t1maxFontSlider, t1goButton, t1wordsFileName, t1changeWordsButton;
 
 // textorizer2 controls
-Controller t2lineHeight, t2textSize, t2colorAdjustment, t2goButton, t2textFileName, t2textFileLabel, t2textInfoLabel;
+Controller t2lineHeight, t2textSize, t2colorAdjustment, t2goButton, t2textFileName, t2textFileLabel, t2changeTextButton;
 
 // Sobel convolution filter
 float[][] Sx = {{-1,0,1}, {-2,0,2}, {-1,0,1}};
@@ -82,7 +82,7 @@ void loadWords(int mode) {
     if (newWords != null) {
       T1WordsFileName = newWordsFileName;
       Words = newWords;
-      ((Textlabel)t1wordsFileName).setValue("Words: " + T1WordsFileName);
+      ((Textlabel)t1wordsFileName).setValue(T1WordsFileName);
     }
     break;
   case 2: // textorizer 2
@@ -91,7 +91,7 @@ void loadWords(int mode) {
     if (newWords != null) {
       T2TextFileName = newWordsFileName;
       Words = newWords;
-      ((Textlabel)t2textFileName).setValue("Text: " + T2TextFileName);
+      ((Textlabel)t2textFileName).setValue(T2TextFileName);
     }
     break;
   }
@@ -107,7 +107,7 @@ void loadImage() {
     loadPixels(); 
     size(Image.width, Image.height); 
     frame.setSize(Image.width, Image.height); 
-    ((Textlabel)imageNameLabel).setValue("Image: "+ImageFileName);
+    ((Textlabel)imageNameLabel).setValue(ImageFileName);
   }
 }
 
@@ -150,15 +150,19 @@ void setup() {
   controlWindow.setUpdateMode(ControlWindow.NORMAL);
 
   // common controls
-  imageNameLabel  = controlP5.addTextlabel("Image","Image: "+ImageFileName, 10,ypos); ypos+=15;
+  changeImageButton  = controlP5.addButton("Change Image >",4, 10,ypos-7, 75, 20); 
+  imageNameLabel  = controlP5.addTextlabel("Image",ImageFileName, 90,ypos);
+  ypos+=20;
 
-  imageInfoLabel  = controlP5.addTextlabel("ImageInfo","    (Press i to change)",10,ypos); ypos+=20;
   bgOpacitySlider = controlP5.addSlider("Background Opacity",0,255,bgOpacity, 10,ypos, 100,20); ypos+=30;
-  svgFileLabel = controlP5.addTextlabel("Svg","SVG output file: "+SvgFileName,10,ypos); ypos+=12; 
-  svgInfoLabel = controlP5.addTextlabel("InfoSVG","    (Press s to change)",10,ypos); ypos+=15; 
 
-  outputImgFileLabel = controlP5.addTextlabel("Img","PNG output file: "+OutputImageFileName,10,ypos); ypos+=12; 
-  outputImgInfoLabel = controlP5.addTextlabel("InfoImg","    (Press o to change)",10,ypos); ypos+=30; 
+  svgChangeButton = controlP5.addButton("Change SVG >",4,10,ypos-7,67,20); 
+  svgFileLabel = controlP5.addTextlabel("Svg",SvgFileName,80,ypos);
+  ypos+=25; 
+
+  outputImgFileLabel = controlP5.addTextlabel("Img",OutputImageFileName,123,ypos); 
+  outputImageChangeButton = controlP5.addButton("Change Output Image >",4,10,ypos-7,110,20);
+  ypos+=30;
 
   currentFontLabel = controlP5.addTextlabel("CurrentFont","Font: "+fontName,10,ypos); ypos+=20; 
 
@@ -170,16 +174,14 @@ void setup() {
   }
 
   imageNameLabel.setWindow(controlWindow);
-  imageInfoLabel.setWindow(controlWindow);
+  changeImageButton.setWindow(controlWindow);
   svgFileLabel.setWindow(controlWindow);
-  svgInfoLabel.setWindow(controlWindow);
+  svgChangeButton.setWindow(controlWindow);
   outputImgFileLabel.setWindow(controlWindow);
-  outputImgInfoLabel.setWindow(controlWindow);
+  outputImageChangeButton.setWindow(controlWindow);
   currentFontLabel.setWindow(controlWindow);
   fontSelector.moveTo(controlWindow);
 
-  bgOpacitySlider.setId(3);
-  fontSelector.setId(6);
   bgOpacitySlider.setWindow(controlWindow);
 
   // Textorizer 1 controls
@@ -189,23 +191,21 @@ void setup() {
   ypos+=25; t1thresholdSlider=controlP5.addSlider("Threshold",0,200,100, 10,ypos, 100,20);
   ypos+=25; t1minFontSlider  =controlP5.addSlider("Min Font Scale",0,50, minFontScale, 10, ypos, 100,20);
   ypos+=25; t1maxFontSlider  =controlP5.addSlider("Max Font Scale",0,50, maxFontScale, 10,ypos, 100,20);
-  ypos+=30; t1wordsFileName  =controlP5.addTextlabel("Words","Words: "+((T1WordsFileName==null)?"":T1WordsFileName), 10,ypos); 
-  ypos+=12; t1wordsInfoLabel = controlP5.addTextlabel("WordsInfo","    (Press w to change)",10,ypos); ypos+=15;
 
-  t1goButton=controlP5.addButton("Textorize!",4, 240,320, 50,20);
+  ypos+=30; 
+  t1changeWordsButton = controlP5.addButton("Change Words >",4, 10,ypos-7, 80, 20); 
+  t1wordsFileName  =controlP5.addTextlabel("Words",((T1WordsFileName==null)?"":T1WordsFileName), 95,ypos); 
+  ypos+=15;
 
-  t1numSlider.setId(1); 
+
+  t1goButton=controlP5.addButton("Textorize!",4, 240,300, 50,20);
+
   t1numSlider.setWindow(controlWindow);
-  t1thresholdSlider.setId(2); 
   t1thresholdSlider.setWindow(controlWindow);
-  t1minFontSlider.setId(4); 
   t1minFontSlider.setWindow(controlWindow);
-  t1maxFontSlider.setId(5); 
   t1maxFontSlider.setWindow(controlWindow);
   t1wordsFileName.setWindow(controlWindow);
-  t1wordsInfoLabel.setWindow(controlWindow);
-
-  t1goButton.setId(10);
+  t1changeWordsButton.setWindow(controlWindow);
   t1goButton.setWindow(controlWindow);
 
 
@@ -215,16 +215,34 @@ void setup() {
   ypos+=20;t2lineHeight=controlP5.addSlider("Line Height",.5,3,T2LineHeight, 10,ypos, 100,20); t2lineHeight.setWindow(controlWindow);
   ypos+=25;t2textSize=controlP5.addSlider("Text Size",4,50,T2FontSize, 10,ypos, 100,20); t2textSize.setWindow(controlWindow);
   ypos+=25;t2colorAdjustment=controlP5.addSlider("Colour Saturation",0,255,T2ColourAdjustment, 10,ypos, 100,20); t2colorAdjustment.setWindow(controlWindow);
-  ypos+=30; t2textFileName  =controlP5.addTextlabel("Text","Text: "+((T2TextFileName==null)?"":T2TextFileName), 10,ypos); t2textFileName.setWindow(controlWindow);
-  ypos+=12; t2textInfoLabel = controlP5.addTextlabel("TextInfo","    (Press t to change)",10,ypos); t2textInfoLabel.setWindow(controlWindow);
+
+  ypos+=30; 
+  t2changeTextButton = controlP5.addButton("Change Text >",4, 10,ypos-7, 70, 20); t2changeTextButton.setWindow(controlWindow);
+  t2textFileName = controlP5.addTextlabel("Text",((T2TextFileName==null)?"":T2TextFileName), 85,ypos); t2textFileName.setWindow(controlWindow);
 
 
-  t2goButton=controlP5.addButton("Textorize2!",4, 235,490, 55,20); t2goButton.setWindow(controlWindow);
+  t2goButton=controlP5.addButton("Textorize2!",4, 235,460, 55,20); t2goButton.setWindow(controlWindow);
+
+
+
+
+  t1numSlider.setId(1); 
+  t1thresholdSlider.setId(2); 
+  bgOpacitySlider.setId(3);
+  t1minFontSlider.setId(4); 
+  t1maxFontSlider.setId(5); 
+  fontSelector.setId(6);
+  changeImageButton.setId(7);
+  svgChangeButton.setId(8);
+  outputImageChangeButton.setId(9);
+  t1goButton.setId(10);
+  t1changeWordsButton.setId(11);
 
   t2lineHeight.setId(100);
   t2textSize.setId(101);
   t2colorAdjustment.setId(102);
   t2goButton.setId(103);
+  t2changeTextButton.setId(104);
 }
 
 void draw()
@@ -390,9 +408,19 @@ void controlEvent(ControlEvent theEvent) {
       controlWindow.update();
       controlWindow.show(); // shouldn't be needed but window won't refresh otherwise
     }
+  } else if (id==7) { // changeImageButton
+    loadImage();
+  } else if (id==8) { // svgChangeButton
+    SvgFileName=selectOutputFile(SvgFileName);
+    ((Textlabel)svgFileLabel).setValue(SvgFileName);
+  } else if (id==9) { // outputImageChangeButton
+    OutputImageFileName=selectOutputFile(OutputImageFileName);
+    ((Textlabel)outputImgFileLabel).setValue(OutputImageFileName);
   } else if (id==10) {
     Mode=1;
     redraw();
+  } else if (id==11) {
+    loadWords(1);
     //---- Textorizer 2 controls ---
   } else if (id==100) {
     T2LineHeight = theEvent.controller().value();
@@ -403,8 +431,10 @@ void controlEvent(ControlEvent theEvent) {
   } else if (id==103) {
     Mode=2;
     redraw();
-    // ---- Font selector control ---
+  } else if (id==104) { // t2changeTextButton
+    loadWords(2);
   } else if (id>=1000) {
+    // ---- Font selector control ---
     fontName=fontList[(int)(theEvent.controller().value())];
     ((Textlabel)currentFontLabel).setValue("Font: "+fontName);    
     font = createFont(fontName, 32);
@@ -429,11 +459,11 @@ void keyPressed()
   }
   if (key=='s') {
     SvgFileName=selectOutputFile(SvgFileName);
-    ((Textlabel)svgFileLabel).setValue("SVG output file: "+SvgFileName);
+    ((Textlabel)svgFileLabel).setValue(SvgFileName);
   }
   if (key=='o') {
     OutputImageFileName=selectOutputFile(OutputImageFileName);
-    ((Textlabel)outputImgFileLabel).setValue("PNG output file: "+OutputImageFileName);
+    ((Textlabel)outputImgFileLabel).setValue(OutputImageFileName);
   }
 }
 
