@@ -311,7 +311,7 @@ void setupBgPicture() {
   tint(255,bgOpacity);
   image(Image,0,0);
   popMatrix();
-  SvgBuffer.append("<image x='0' y='0' width='"+width+"' height='"+height+"' opacity='"+bgOpacity/255.0+"' xlink:href='"+ImageFileName+"'/>\n");
+  SvgBuffer.append("<image x='0' y='0' width='"+canvasWidth+"' height='"+canvasHeight+"' opacity='"+bgOpacity/255.0+"' xlink:href='"+ImageFileName+"'/>\n");
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -553,7 +553,7 @@ void textorize2()
     canvasWidth=width; canvasHeight=float(width)/inputAspectRatio;
   }
 
-  setupSvg();
+  setupSvg();   <-- already called in draw() -- needed too?
   setupFont();
   setupBgPicture();
   Words=loadStrings(T2TextFileName);
