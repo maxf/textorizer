@@ -45,8 +45,9 @@ float T2ColourAdjustment=0;
 
 
 int originalWidth=500, originalHeight=350; // initial size of the window
-int InputWidth, InputHeight; // width of the original picture
-float InputAspectRatio;
+int InputWidth, InputHeight; // dimensions of the original picture
+int CanvasWidth, CanvasHeight; // dimensions of the output canvas (the part of the output window where we're going to draw)
+float InputAspectRatio, CanvasAspectRatio;
 
 int bgOpacity=30;
 
@@ -257,6 +258,18 @@ void draw()
   background(255);
 
   if (Mode != 0) {
+    CanvasAspectRatio = float(width)/height;
+    InputAspectRatio = float(InputWidth)/InputHeight;
+    
+    if (CanvasAspectRatio > InputAspectRatio) {
+      CanvasWidth=int(height*InputAspectRatio);
+      CanvasHeight=height;
+    }
+    else {
+      CanvasWidth=width; 
+      CanvasHeight=int(width/InputAspectRatio);
+    }
+
     setupSvg();
     setupFont();
     setupBgPicture();
@@ -311,7 +324,7 @@ void setupBgPicture() {
   tint(255,bgOpacity);
   image(Image,0,0);
   popMatrix();
-  SvgBuffer.append("<image x='0' y='0' width='"+canvasWidth+"' height='"+canvasHeight+"' opacity='"+bgOpacity/255.0+"' xlink:href='"+ImageFileName+"'/>\n");
+  SvgBuffer.append("<image x='0' y='0' width='"+CanvasWidth+"' height='"+CanvasHeight+"' opacity='"+bgOpacity/255.0+"' xlink:href='"+ImageFileName+"'/>\n");
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -320,15 +333,6 @@ void textorize() {
   float dx,dy,dmag2,vnear,b,textScale,dir,r;
   color v,p;
   String word;
-  float canvasWidth, canvasHeight;
-  float imageAspectRatio = float(width)/height;
-  float inputAspectRatio = float(InputWidth)/InputHeight;
-
-  if (imageAspectRatio > inputAspectRatio) {
-    canvasWidth=float(height)*inputAspectRatio; canvasHeight=height;
-  } else {
-    canvasWidth=width; canvasHeight=float(width)/inputAspectRatio;
-  }
     
   fill(128);
   Words=loadStrings(T1WordsFileName);
@@ -369,8 +373,8 @@ void textorize() {
       textSize(textScale);
       
       pushMatrix();
-      tx=int(float(x)*canvasWidth/InputWidth);
-      ty=int(float(y)*canvasHeight/InputHeight);
+      tx=int(float(x)*CanvasWidth/InputWidth);
+      ty=int(float(y)*CanvasHeight/InputHeight);
       r=dir+PI/2;
       word=(String)(Words[h % Words.length]);
       
@@ -543,19 +547,7 @@ void textorize2()
 {
   StringBuffer textbuffer = new StringBuffer();
   String text;
-  float imageAspectRatio = float(width)/height;
-  float inputAspectRatio = float(InputWidth)/InputHeight;
 
-  float canvasWidth, canvasHeight;
-  if (imageAspectRatio > inputAspectRatio) {
-    canvasWidth=float(height)*inputAspectRatio; canvasHeight=height;
-  } else {
-    canvasWidth=width; canvasHeight=float(width)/inputAspectRatio;
-  }
-
-  setupSvg();   <-- already called in draw() -- needed too?
-  setupFont();
-  setupBgPicture();
   Words=loadStrings(T2TextFileName);
   fill(128);
 
@@ -573,17 +565,17 @@ void textorize2()
   float rx, scale, r,g,b;
   char c, charToPrint;
   color pixel;
-  float imgScaleFactorX = float(Image.width)/canvasWidth;
-  float imgScaleFactorY = float(Image.height)/canvasHeight;
+  float imgScaleFactorX = float(Image.width)/CanvasWidth;
+  float imgScaleFactorY = float(Image.height)/CanvasHeight;
 
-  for (y=0; y < canvasHeight; y+=T2FontSize*T2LineHeight) {
+  for (y=0; y < CanvasHeight; y+=T2FontSize*T2LineHeight) {
     rx=1;
 
     // skip any white space at the beginning of the line
     while (text.charAt(ti%nbletters) == ' ') ti++; 
 
 
-    while (rx<canvasWidth) {
+    while (rx<CanvasWidth) {
       x=(int)floor(rx)-1;
 
       pixel = pixelAverageAt(int(x*imgScaleFactorX), int(y*imgScaleFactorY), 1);
@@ -633,7 +625,7 @@ void textorize2()
   float innerFrameWidth=2;
   r=(outerFrameWidth-innerFrameWidth)/2;
 
-  SvgBuffer.append("</g>\n<rect x='-"+r+"' y='-"+r+"' width='"+(canvasWidth+2*r)+"' height='"+(canvasHeight+2*r)+"' fill='none' stroke='white' stroke-width='"+(outerFrameWidth+innerFrameWidth)+"'/>\n\n</svg>\n");
+  SvgBuffer.append("</g>\n<rect x='-"+r+"' y='-"+r+"' width='"+(CanvasWidth+2*r)+"' height='"+(CanvasHeight+2*r)+"' fill='none' stroke='white' stroke-width='"+(outerFrameWidth+innerFrameWidth)+"'/>\n\n</svg>\n");
 
   SvgOutput=new String[1];
   SvgOutput[0]=SvgBuffer.toString();
