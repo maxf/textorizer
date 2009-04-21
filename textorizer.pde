@@ -225,7 +225,9 @@ void setup() {
 
   t2goButton=controlP5.addButton("Textorize2!",4, 235,460, 55,20); t2goButton.setWindow(controlWindow);
 
-
+  // info label
+  controlP5.addTextlabel("About","------ Textorizer - http://lapin-bleu.net/software/textorizer ------", 0,590).setWindow(controlWindow);
+  
 
 
   t1numSlider.setId(1); 
