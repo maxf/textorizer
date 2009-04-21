@@ -214,8 +214,8 @@ void setup() {
   // Textorizer 2 controls
   ypos+=30;textorizer2label = controlP5.addTextlabel("Textorizer2",t2SeparatorStringIdle, 10,ypos);
   textorizer2label.setWindow(controlWindow);
-  ypos+=20;t2lineHeight=controlP5.addSlider("Line Height",.5,3,T2LineHeight, 10,ypos, 100,20); t2lineHeight.setWindow(controlWindow);
-  ypos+=25;t2textSize=controlP5.addSlider("Text Size",4,50,T2FontSize, 10,ypos, 100,20); t2textSize.setWindow(controlWindow);
+  ypos+=20;t2textSize=controlP5.addSlider("Text Size",4,50,T2FontSize, 10,ypos, 100,20); t2textSize.setWindow(controlWindow);
+  ypos+=25;t2lineHeight=controlP5.addSlider("Line Height",.5,3,T2LineHeight, 10,ypos, 100,20); t2lineHeight.setWindow(controlWindow);
   ypos+=25;t2colorAdjustment=controlP5.addSlider("Colour Saturation",0,255,T2ColourAdjustment, 10,ypos, 100,20); t2colorAdjustment.setWindow(controlWindow);
 
   ypos+=30; 
