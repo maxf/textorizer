@@ -587,10 +587,6 @@ void textorize2()
       scale=2-brightness(pixel)/255.0;
       c=text.charAt(ti%nbletters);
 
-      if (c > font.width.length)
-        c='?'; // the font doesn't support this character
-
-
       if (r+g+b<3*255) { // eliminate white 
 
         charToPrint=c;
@@ -612,12 +608,12 @@ void textorize2()
         r=red(charColour); g=green(charColour); b=blue(charColour);
         SvgBuffer.append("<text x='"+rx+"' y='"+(y+T2FontSize*T2LineHeight)+"' font-size='"+(T2FontSize*scale)+"' fill='rgb("+int(r)+","+int(g)+","+int(b)+")'>"+charToPrint+"</text>\n");
         
-        rx+=scale*font.width(c)*T2FontSize;
-        ti++; // next letter 
+        rx+=textWidth(Character.toString(c));
+        ti++; // next letter
       } 
       else {
         // advance one em 
-        rx+=scale*font.width('m')*T2FontSize;
+        rx+=textWidth(" ");
       }
     }
   }
