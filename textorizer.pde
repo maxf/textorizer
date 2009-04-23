@@ -626,7 +626,12 @@ void textorize2()
     }
   }
 
-  // framing rectangle. Should be a clipping path, but no FF support
+  // framing rectangle
+  // 1. processing
+  // 4 rectangles, etc.
+
+  // 2. SVG
+  // Should be a clipping path, but no FF support
   float outerFrameWidth=200;
   float innerFrameWidth=2;
   r=(outerFrameWidth-innerFrameWidth)/2;
