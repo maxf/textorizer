@@ -109,8 +109,6 @@ void loadImage() {
     Image=newImage;
     InputWidth=Image.width; InputHeight=Image.height;
     loadPixels(); 
-    size(Image.width, Image.height); 
-    frame.setSize(Image.width, Image.height); 
     ((Textlabel)imageNameLabel).setValue(ImageFileName);
   }
 }
@@ -570,7 +568,6 @@ void textorize2()
     textbuffer.append(Words[i]);
   }
   text=textbuffer.toString();
-
 
   int nbletters = text.length();
   int ti=0;
