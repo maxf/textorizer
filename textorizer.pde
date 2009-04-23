@@ -42,6 +42,7 @@ float maxFontScale=30;
 float T2LineHeight=1.0;
 float T2FontSize=14.0;
 float T2ColourAdjustment=0;
+float T2Kerning=0;
 
 
 int originalWidth=500, originalHeight=350; // initial size of the window
@@ -59,7 +60,7 @@ ScrollList fontSelector;
 Controller t1numSlider, t1thresholdSlider, t1minFontSlider, t1maxFontSlider, t1goButton, t1wordsFileName, t1changeWordsButton;
 
 // textorizer2 controls
-Controller t2lineHeight, t2textSize, t2colorAdjustment, t2goButton, t2textFileName, t2textFileLabel, t2changeTextButton;
+Controller t2lineHeight, t2textSize, t2colorAdjustment, t2goButton, t2textFileName, t2textFileLabel, t2changeTextButton, t2kerningSlider;
 
 // Sobel convolution filter
 float[][] Sx = {{-1,0,1}, {-2,0,2}, {-1,0,1}};
@@ -218,10 +219,11 @@ void setup() {
   ypos+=25;t2lineHeight=controlP5.addSlider("Line Height",.5,3,T2LineHeight, 10,ypos, 100,20); t2lineHeight.setWindow(controlWindow);
   ypos+=25;t2colorAdjustment=controlP5.addSlider("Colour Saturation",0,255,T2ColourAdjustment, 10,ypos, 100,20); t2colorAdjustment.setWindow(controlWindow);
 
+  ypos+=25;
+  t2kerningSlider=controlP5.addSlider("Kerning",-.5,.5,T2Kerning, 10,ypos, 100,20); t2kerningSlider.setWindow(controlWindow);
   ypos+=30; 
   t2changeTextButton = controlP5.addButton("Change Text >",4, 10,ypos-7, 70, 20); t2changeTextButton.setWindow(controlWindow);
   t2textFileName = controlP5.addTextlabel("Text",((T2TextFileName==null)?"":T2TextFileName), 85,ypos); t2textFileName.setWindow(controlWindow);
-
 
   t2goButton=controlP5.addButton("Textorize2!",4, 235,460, 55,20); t2goButton.setWindow(controlWindow);
 
@@ -247,6 +249,7 @@ void setup() {
   t2colorAdjustment.setId(102);
   t2goButton.setId(103);
   t2changeTextButton.setId(104);
+  t2kerningSlider.setId(105);
 }
 
 void draw()
@@ -455,6 +458,8 @@ void controlEvent(ControlEvent theEvent) {
     redraw();
   } else if (id==104) { // t2changeTextButton
     loadWords(2);
+  } else if (id==105) { // t2kerningSlider
+    T2Kerning = theEvent.controller().value();
   } else if (id>=1000) {
     // ---- Font selector control ---
     fontName=fontList[(int)(theEvent.controller().value())];
@@ -608,12 +613,12 @@ void textorize2()
         r=red(charColour); g=green(charColour); b=blue(charColour);
         SvgBuffer.append("<text x='"+rx+"' y='"+(y+T2FontSize*T2LineHeight)+"' font-size='"+(T2FontSize*scale)+"' fill='rgb("+int(r)+","+int(g)+","+int(b)+")'>"+charToPrint+"</text>\n");
         
-        rx+=textWidth(Character.toString(c));
+        rx+=textWidth(Character.toString(c)) * (1+T2Kerning);
         ti++; // next letter
       } 
       else {
         // advance one em 
-        rx+=textWidth(" ");
+        rx+=textWidth(" ") * (1+T2Kerning);
       }
     }
   }
