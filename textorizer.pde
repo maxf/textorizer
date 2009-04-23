@@ -40,9 +40,10 @@ float minFontScale=5;
 float maxFontScale=30;
 
 float T2LineHeight=1.0;
-float T2FontSize=14.0;
+float T2FontSize=12.0;
 float T2ColourAdjustment=0;
 float T2Kerning=0;
+float T2FontScaleFactor=1.5;
 
 
 int originalWidth=500, originalHeight=350; // initial size of the window
@@ -60,7 +61,7 @@ ScrollList fontSelector;
 Controller t1numSlider, t1thresholdSlider, t1minFontSlider, t1maxFontSlider, t1goButton, t1wordsFileName, t1changeWordsButton;
 
 // textorizer2 controls
-Controller t2lineHeight, t2textSize, t2colorAdjustment, t2goButton, t2textFileName, t2textFileLabel, t2changeTextButton, t2kerningSlider;
+Controller t2lineHeight, t2textSize, t2colorAdjustment, t2goButton, t2textFileName, t2textFileLabel, t2changeTextButton, t2kerningSlider, t2fontScaleFactorSlider;
 
 // Sobel convolution filter
 float[][] Sx = {{-1,0,1}, {-2,0,2}, {-1,0,1}};
@@ -218,10 +219,12 @@ void setup() {
   ypos+=20;t2textSize=controlP5.addSlider("Text Size",4,50,T2FontSize, 10,ypos, 100,20); t2textSize.setWindow(controlWindow);
   ypos+=25;t2lineHeight=controlP5.addSlider("Line Height",.5,3,T2LineHeight, 10,ypos, 100,20); t2lineHeight.setWindow(controlWindow);
   ypos+=25;t2colorAdjustment=controlP5.addSlider("Colour Saturation",0,255,T2ColourAdjustment, 10,ypos, 100,20); t2colorAdjustment.setWindow(controlWindow);
-
   ypos+=25;
   t2kerningSlider=controlP5.addSlider("Kerning",-.5,.5,T2Kerning, 10,ypos, 100,20); t2kerningSlider.setWindow(controlWindow);
-  ypos+=30; 
+  ypos+=25;
+  t2fontScaleFactorSlider=controlP5.addSlider("Font Scale",0,5,T2FontScaleFactor, 10,ypos, 100,20); t2fontScaleFactorSlider.setWindow(controlWindow);
+
+  ypos+=35; 
   t2changeTextButton = controlP5.addButton("Change Text >",4, 10,ypos-7, 70, 20); t2changeTextButton.setWindow(controlWindow);
   t2textFileName = controlP5.addTextlabel("Text",((T2TextFileName==null)?"":T2TextFileName), 85,ypos); t2textFileName.setWindow(controlWindow);
 
@@ -250,6 +253,7 @@ void setup() {
   t2goButton.setId(103);
   t2changeTextButton.setId(104);
   t2kerningSlider.setId(105);
+  t2fontScaleFactorSlider.setId(106);
 }
 
 void draw()
@@ -460,6 +464,8 @@ void controlEvent(ControlEvent theEvent) {
     loadWords(2);
   } else if (id==105) { // t2kerningSlider
     T2Kerning = theEvent.controller().value();
+  } else if (id==106) { // t2fontScaleFactorSlider
+    T2FontScaleFactor = theEvent.controller().value();
   } else if (id>=1000) {
     // ---- Font selector control ---
     fontName=fontList[(int)(theEvent.controller().value())];
@@ -607,7 +613,7 @@ void textorize2()
           fill(charColour);
         }
 
-        textSize(T2FontSize*scale);
+        textSize(T2FontSize * (1 + T2FontScaleFactor*pow(scale-1,3)));
         text(charToPrint, x, y+T2FontSize*T2LineHeight);
 
         r=red(charColour); g=green(charColour); b=blue(charColour);
