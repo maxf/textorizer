@@ -8,6 +8,6 @@ zip -r textorizer-macosx-${DATESTRING}.zip application.macosx
 zip -r textorizer-linux-${DATESTRING}.zip application.linux
 ln -s  textorizer-linux-${DATESTRING}.zip textorizer-linux.zip
 ln -s  textorizer-macosx-${DATESTRING}.zip textorizer-macosx.zip
-ln -s  textorizer-windows-${DATESTRING}.ziptextorizer-windows.zip
+ln -s  textorizer-windows-${DATESTRING}.zip textorizer-windows.zip
 
 rsync -va *.zip *.png dreamhost:lapin-bleu.net/software/textorizer
