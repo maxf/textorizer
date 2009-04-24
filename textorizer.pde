@@ -81,7 +81,7 @@ void loadWords(int mode) {
 
   switch(mode) {
   case 1: // textorizer 1
-    newWordsFileName = selectFile(T1WordsFileName);
+    newWordsFileName = selectFile(T1WordsFileName,1);
     newWords = loadStrings(newWordsFileName);
     if (newWords != null) {
       T1WordsFileName = newWordsFileName;
@@ -90,7 +90,7 @@ void loadWords(int mode) {
     }
     break;
   case 2: // textorizer 2
-    newWordsFileName = selectFile(T2TextFileName);
+    newWordsFileName = selectFile(T2TextFileName,1);
     newWords = loadStrings(newWordsFileName);
     if (newWords != null) {
       T2TextFileName = newWordsFileName;
@@ -102,7 +102,7 @@ void loadWords(int mode) {
 }
 
 void loadImage() {
-  String newImageFileName = selectFile(ImageFileName);
+  String newImageFileName = selectFile(ImageFileName,1);
   PImage newImage = loadImage(newImageFileName);
   if (newImage!=null && newImage.width!=-1 && newImage.height!=-1) {
     ImageFileName=newImageFileName;
@@ -438,10 +438,10 @@ void controlEvent(ControlEvent theEvent) {
   } else if (id==7) { // changeImageButton
     loadImage();
   } else if (id==8) { // svgChangeButton
-    SvgFileName=selectOutputFile(SvgFileName);
+    SvgFileName=selectFile(SvgFileName,2);
     ((Textlabel)svgFileLabel).setValue(SvgFileName);
   } else if (id==9) { // outputImageChangeButton
-    OutputImageFileName=selectOutputFile(OutputImageFileName);
+    OutputImageFileName=selectFile(OutputImageFileName,2);
     ((Textlabel)outputImgFileLabel).setValue(OutputImageFileName);
   } else if (id==10) {
     Mode=1;
@@ -489,17 +489,19 @@ void keyPressed()
     loadWords(2);
   }
   if (key=='s') {
-    SvgFileName=selectOutputFile(SvgFileName);
+    SvgFileName=selectFile(SvgFileName,2);
     ((Textlabel)svgFileLabel).setValue(SvgFileName);
   }
   if (key=='o') {
-    OutputImageFileName=selectOutputFile(OutputImageFileName);
+    OutputImageFileName=selectFile(OutputImageFileName,2);
     ((Textlabel)outputImgFileLabel).setValue(OutputImageFileName);
   }
 }
 
+
 static String currentDirectory;
-String selectFile(String previousFileName) {
+
+String selectFile(String previousFileName, int openOrSave) {
   String result=previousFileName;
   try {
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -512,35 +514,11 @@ String selectFile(String previousFileName) {
   else
     jfc = new JFileChooser();
 
-  int r = jfc.showOpenDialog(this);
-
-  if (r == JFileChooser.APPROVE_OPTION) {
-    File file = jfc.getSelectedFile();
-    jfc.hide();
-    currentDirectory=jfc.getCurrentDirectory().getPath();
-    result=file.getPath();
+  int r;
+  switch(openOrSave) {
+  case 2: r = jfc.showSaveDialog(this); break;
+  default: r = jfc.showOpenDialog(this); break;
   }
-  else {
-    jfc.hide();
-  }
-  return result;
-}
-
-String selectOutputFile(String previousFileName) {
-  String result=previousFileName;
-  try {
-    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-  } catch (Exception e) {
-    println(e);
-  }
-  JFileChooser jfc;
-  if (currentDirectory != null)
-    jfc = new JFileChooser(currentDirectory);
-  else
-    jfc = new JFileChooser();
-
-  int r = jfc.showSaveDialog(this);
-
   if (r == JFileChooser.APPROVE_OPTION) {
     File file = jfc.getSelectedFile();
     jfc.hide();
