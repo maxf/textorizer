@@ -499,36 +499,55 @@ void keyPressed()
 }
 
 
+
 static String currentDirectory;
+static String selectFileResult;
+static int selectFileMode;
 
-String selectFile(String previousFileName, int openOrSave) {
-  String result=previousFileName;
-  try {
-    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-  } catch (Exception e) {
-    println(e);
-  }
-  JFileChooser jfc;
-  if (currentDirectory != null)
-    jfc = new JFileChooser(currentDirectory);
-  else
-    jfc = new JFileChooser();
+String selectFile(String previousFileName, int mode) {
+  noLoop();
+  selectFileMode=mode;
+  selectFileResult=previousFileName;
+  selectFileDialog();
+  println("selectFileResult: "+selectFileResult);
+  return selectFileResult;
+}
 
-  int r;
-  switch(openOrSave) {
-  case 2: r = jfc.showSaveDialog(this); break;
-  default: r = jfc.showOpenDialog(this); break;
-  }
-  if (r == JFileChooser.APPROVE_OPTION) {
-    File file = jfc.getSelectedFile();
-    jfc.hide();
-    currentDirectory=jfc.getCurrentDirectory().getPath();
-    result=file.getPath();
-  }
-  else {
-    jfc.hide();
-  }
-  return result;
+void selectFileDialog() {
+  SwingUtilities.invokeLater(new Runnable() {
+      public void run() {     
+        try {
+          try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+          } catch (Exception e) {
+            println(e);
+          }
+          JFileChooser jfc;
+          if (currentDirectory != null)
+            jfc = new JFileChooser(currentDirectory);
+          else
+            jfc = new JFileChooser();
+          
+          int r;
+          switch(selectFileMode) {
+          case 2: r = jfc.showSaveDialog(null); break;
+          default: r = jfc.showOpenDialog(null); break;
+          }
+          if (r == JFileChooser.APPROVE_OPTION) {
+            File file = jfc.getSelectedFile();
+            jfc.hide();
+            currentDirectory=jfc.getCurrentDirectory().getPath();
+            selectFileResult=file.getPath();
+            println("approved! "+selectFileResult);
+          }
+          else {
+            jfc.hide();
+          }
+        } catch (Exception e) {
+          println(e);
+        }
+      }
+    });
 }
 
 // %%%%% Textorizer 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
