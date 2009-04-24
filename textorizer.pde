@@ -500,6 +500,7 @@ void keyPressed()
 
 static String currentDirectory;
 String selectFile(String previousFileName) {
+  String result=previousFileName;
   try {
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
   } catch (Exception e) {
@@ -517,15 +518,16 @@ String selectFile(String previousFileName) {
     File file = jfc.getSelectedFile();
     jfc.hide();
     currentDirectory=jfc.getCurrentDirectory().getPath();
-    return file.getPath();
+    result=file.getPath();
   }
   else {
     jfc.hide();
-    return previousFileName;
   }
+  return result;
 }
 
 String selectOutputFile(String previousFileName) {
+  String result=previousFileName;
   try {
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
   } catch (Exception e) {
@@ -543,12 +545,12 @@ String selectOutputFile(String previousFileName) {
     File file = jfc.getSelectedFile();
     jfc.hide();
     currentDirectory=jfc.getCurrentDirectory().getPath();
-    return file.getPath();
+    result=file.getPath();
   }
   else {
     jfc.hide();
-    return previousFileName;
   }
+  return result;
 }
 
 // %%%%% Textorizer 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
