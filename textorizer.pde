@@ -81,7 +81,7 @@ void loadWords(int mode) {
 
   switch(mode) {
   case 1: // textorizer 1
-    newWordsFileName = selectFile(T1WordsFileName,1);
+    newWordsFileName = selectInputFile(T1WordsFileName);
     newWords = loadStrings(newWordsFileName);
     if (newWords != null) {
       T1WordsFileName = newWordsFileName;
@@ -90,7 +90,7 @@ void loadWords(int mode) {
     }
     break;
   case 2: // textorizer 2
-    newWordsFileName = selectFile(T2TextFileName,1);
+    newWordsFileName = selectInputFile(T2TextFileName);
     newWords = loadStrings(newWordsFileName);
     if (newWords != null) {
       T2TextFileName = newWordsFileName;
@@ -102,11 +102,14 @@ void loadWords(int mode) {
 }
 
 void loadImage() {
-  String newImageFileName = selectFile(ImageFileName,1);
+  String newImageFileName = selectInputFile(ImageFileName);
   PImage newImage = loadImage(newImageFileName);
+
   if (newImage!=null && newImage.width!=-1 && newImage.height!=-1) {
+    println("ok");
     ImageFileName=newImageFileName;
     Image=newImage;
+    println(">><<"+ImageFileName);
     InputWidth=Image.width; InputHeight=Image.height;
     loadPixels(); 
     ((Textlabel)imageNameLabel).setValue(ImageFileName);
@@ -438,10 +441,11 @@ void controlEvent(ControlEvent theEvent) {
   } else if (id==7) { // changeImageButton
     loadImage();
   } else if (id==8) { // svgChangeButton
-    SvgFileName=selectFile(SvgFileName,2);
+    SvgFileName = selectOutputFile(SvgFileName);
     ((Textlabel)svgFileLabel).setValue(SvgFileName);
   } else if (id==9) { // outputImageChangeButton
-    OutputImageFileName=selectFile(OutputImageFileName,2);
+    String s;
+    OutputImageFileName = selectOutputFile(OutputImageFileName);
     ((Textlabel)outputImgFileLabel).setValue(OutputImageFileName);
   } else if (id==10) {
     Mode=1;
@@ -489,66 +493,27 @@ void keyPressed()
     loadWords(2);
   }
   if (key=='s') {
-    SvgFileName=selectFile(SvgFileName,2);
+    SvgFileName = selectOutputFile(SvgFileName);
     ((Textlabel)svgFileLabel).setValue(SvgFileName);
   }
   if (key=='o') {
-    OutputImageFileName=selectFile(OutputImageFileName,2);
+    OutputImageFileName = selectOutputFile(OutputImageFileName);
     ((Textlabel)outputImgFileLabel).setValue(OutputImageFileName);
   }
 }
 
-
-
-static String currentDirectory;
-static String selectFileResult;
-static int selectFileMode;
-
-String selectFile(String previousFileName, int mode) {
-  noLoop();
-  selectFileMode=mode;
-  selectFileResult=previousFileName;
-  selectFileDialog();
-  println("selectFileResult: "+selectFileResult);
-  return selectFileResult;
+String selectInputFile(String defaultName)
+{
+  String s;
+  return ((s=selectInput())!=null) ? s : defaultName;
 }
 
-void selectFileDialog() {
-  SwingUtilities.invokeLater(new Runnable() {
-      public void run() {     
-        try {
-          try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-          } catch (Exception e) {
-            println(e);
-          }
-          JFileChooser jfc;
-          if (currentDirectory != null)
-            jfc = new JFileChooser(currentDirectory);
-          else
-            jfc = new JFileChooser();
-          
-          int r;
-          switch(selectFileMode) {
-          case 2: r = jfc.showSaveDialog(null); break;
-          default: r = jfc.showOpenDialog(null); break;
-          }
-          if (r == JFileChooser.APPROVE_OPTION) {
-            File file = jfc.getSelectedFile();
-            jfc.hide();
-            currentDirectory=jfc.getCurrentDirectory().getPath();
-            selectFileResult=file.getPath();
-            println("approved! "+selectFileResult);
-          }
-          else {
-            jfc.hide();
-          }
-        } catch (Exception e) {
-          println(e);
-        }
-      }
-    });
+String selectOutputFile(String defaultName)
+{
+  String s;
+  return ((s=selectOutput())!=null) ? s : defaultName;
 }
+
 
 // %%%%% Textorizer 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
