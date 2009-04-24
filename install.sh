@@ -1,6 +1,8 @@
 #!/bin/sh
-zip -r textorizer12.windows.zip application.windows
-zip -r textorizer12.macosx.zip application.macosx
-zip -r textorizer12.linux.zip application.linux
+cp Textorizer.icns application.macosx/textorizer.app/Contents/Resources
+cp Textorizer.icns application.macosx/textorizer.app/Contents/Resources/sketch.icns
+zip -r textorizer.windows.zip application.windows
+zip -r textorizer.macosx.zip application.macosx
+zip -r textorizer.linux.zip application.linux
 
-scp *.zip dreamhost:lapin-bl.eu/textorizer12
+scp *.zip *.png dreamhost:lapin-bleu.net/software/textorizer
