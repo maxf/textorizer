@@ -174,7 +174,8 @@ void setup() {
   fontSelector = controlP5.addScrollList("Select Font",10,ypos, 200,100); ypos+=110;
 
   for (int i=0;i<fontList.length;i++) {
-    controlP5.Button b=fontSelector.addItem(fontList[i],i);
+    String fontNameAscii = fontList[i].replaceAll("[^\\p{ASCII}]", " ");
+    controlP5.Button b=fontSelector.addItem(fontNameAscii,i);
     b.setId(1000+i);
   }
 
