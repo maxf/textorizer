@@ -86,7 +86,8 @@ void loadWords(int mode) {
     if (newWords != null) {
       T1WordsFileName = newWordsFileName;
       Words = newWords;
-      ((Textlabel)t1wordsFileName).setValue(T1WordsFileName);
+      setTextLabelValue((Textlabel)t1wordsFileName, T1WordsFileName);
+      // ((Textlabel)t1wordsFileName).setValue(T1WordsFileName);
     }
     break;
   case 2: // textorizer 2
@@ -95,7 +96,8 @@ void loadWords(int mode) {
     if (newWords != null) {
       T2TextFileName = newWordsFileName;
       Words = newWords;
-      ((Textlabel)t2textFileName).setValue(T2TextFileName);
+      setTextLabelValue((Textlabel)t2textFileName, T2TextFileName);
+      //      ((Textlabel)t2textFileName).setValue(T2TextFileName);
     }
     break;
   }
@@ -106,13 +108,12 @@ void loadImage() {
   PImage newImage = loadImage(newImageFileName);
 
   if (newImage!=null && newImage.width!=-1 && newImage.height!=-1) {
-    println("ok");
     ImageFileName=newImageFileName;
     Image=newImage;
-    println(">><<"+ImageFileName);
     InputWidth=Image.width; InputHeight=Image.height;
     loadPixels(); 
-    ((Textlabel)imageNameLabel).setValue(ImageFileName);
+    setTextLabelValue((Textlabel)imageNameLabel, ImageFileName);
+    //    ((Textlabel)imageNameLabel).setValue(ImageFileName);
   }
 }
 
@@ -172,6 +173,7 @@ void setup() {
   currentFontLabel = controlP5.addTextlabel("CurrentFont","Font: "+fontName,10,ypos); ypos+=20; 
 
   fontSelector = controlP5.addScrollList("Select Font",10,ypos, 200,100); ypos+=110;
+
 
   for (int i=0;i<fontList.length;i++) {
     String fontNameAscii = fontList[i].replaceAll("[^\\p{ASCII}]", " ");
@@ -261,8 +263,10 @@ void setup() {
 void draw()
 {
   t1goButton.hide(); t2goButton.hide();
-  ((Textlabel)textorizer1label).setValue(t1SeparatorStringRunning);    
-  ((Textlabel)textorizer2label).setValue(t2SeparatorStringRunning);    
+  setTextLabelValue((Textlabel)textorizer1label, t1SeparatorStringRunning);
+  setTextLabelValue((Textlabel)textorizer2label, t2SeparatorStringRunning);
+  //  ((Textlabel)textorizer1label).setValue(t1SeparatorStringRunning);    
+  //  ((Textlabel)textorizer2label).setValue(t2SeparatorStringRunning);    
 
 
   cursor(WAIT);
@@ -296,8 +300,10 @@ void draw()
   save(OutputImageFileName);
 
   t1goButton.show(); t2goButton.show();
-  ((Textlabel)textorizer1label).setValue(t1SeparatorStringIdle);    
-  ((Textlabel)textorizer2label).setValue(t2SeparatorStringIdle);    
+  setTextLabelValue((Textlabel)textorizer1label, t1SeparatorStringIdle);
+  setTextLabelValue((Textlabel)textorizer1label, t1SeparatorStringIdle);
+  //  ((Textlabel)textorizer1label).setValue(t1SeparatorStringIdle);    
+  //  ((Textlabel)textorizer2label).setValue(t2SeparatorStringIdle);    
 }
 
 void setupSvg() {
@@ -443,11 +449,13 @@ void controlEvent(ControlEvent theEvent) {
     loadImage();
   } else if (id==8) { // svgChangeButton
     SvgFileName = selectOutputFile(SvgFileName);
-    ((Textlabel)svgFileLabel).setValue(SvgFileName);
+    setTextLabelValue((Textlabel)svgFileLabel,SvgFileName);
+    //    ((Textlabel)svgFileLabel).setValue(SvgFileName);
   } else if (id==9) { // outputImageChangeButton
     String s;
     OutputImageFileName = selectOutputFile(OutputImageFileName);
-    ((Textlabel)outputImgFileLabel).setValue(OutputImageFileName);
+    setTextLabelValue((Textlabel)outputImgFileLabel, OutputImageFileName);
+    //    ((Textlabel)outputImgFileLabel).setValue(OutputImageFileName);
   } else if (id==10) {
     Mode=1;
     redraw();
@@ -472,7 +480,8 @@ void controlEvent(ControlEvent theEvent) {
   } else if (id>=1000) {
     // ---- Font selector control ---
     fontName=fontList[(int)(theEvent.controller().value())];
-    ((Textlabel)currentFontLabel).setValue("Font: "+fontName);    
+    setTextLabelValue((Textlabel)currentFontLabel, "Font: "+fontName);
+    //    ((Textlabel)currentFontLabel).setValue("Font: "+fontName);
     font = createFont(fontName, 32);
     textFont(font);
   } else {
@@ -495,11 +504,13 @@ void keyPressed()
   }
   if (key=='s') {
     SvgFileName = selectOutputFile(SvgFileName);
-    ((Textlabel)svgFileLabel).setValue(SvgFileName);
+    setTextLabelValue((Textlabel)svgFileLabel, SvgFileName);
+    //    ((Textlabel)svgFileLabel).setValue(SvgFileName);
   }
   if (key=='o') {
     OutputImageFileName = selectOutputFile(OutputImageFileName);
-    ((Textlabel)outputImgFileLabel).setValue(OutputImageFileName);
+    setTextLabelValue((Textlabel)outputImgFileLabel, OutputImageFileName);
+    //    ((Textlabel)outputImgFileLabel).setValue(OutputImageFileName);
   }
 }
 
@@ -628,4 +639,11 @@ color pixelAverageAt(int x, int y, int radius)
     }
   }
   return color(resultR/count, resultG/count, resultB/count);
+}
+
+/*
+ * This function should be used instead of TextLabel.setValue which will throw an exception when passed a non-ascii string
+ */
+void setTextLabelValue(Textlabel label, String text) {
+  label.setValue(text.replaceAll("[^\\p{ASCII}]", " "));
 }
