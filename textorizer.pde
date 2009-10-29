@@ -301,7 +301,7 @@ void draw()
 
   t1goButton.show(); t2goButton.show();
   setTextLabelValue((Textlabel)textorizer1label, t1SeparatorStringIdle);
-  setTextLabelValue((Textlabel)textorizer1label, t1SeparatorStringIdle);
+  setTextLabelValue((Textlabel)textorizer2label, t2SeparatorStringIdle);
   //  ((Textlabel)textorizer1label).setValue(t1SeparatorStringIdle);    
   //  ((Textlabel)textorizer2label).setValue(t2SeparatorStringIdle);    
 }
