@@ -16,15 +16,15 @@ ControlWindow controlWindow; // the controls must be in a separate window, since
 
 int SliderWidth = 150;
 
-String ImageFileName="opera.jpg";
+String ImageFileName="jetlag.jpg";
 String T1WordsFileName="textorizer.txt";
 String T2TextFileName="textorizer2.txt";
 String fontName="FFScala";
 
 String t1SeparatorStringIdle=   "---------------------- Textorizer 1 --------------------";
 String t2SeparatorStringIdle=   "---------------------- Textorizer 2 --------------------";
-String t1SeparatorStringRunning="----------------------- RENDERING ---------------------";
-String t2SeparatorStringRunning="----------------------- RENDERING ---------------------";
+String t1SeparatorStringRunning="----------------------- RENDERING --------------- ";
+String t2SeparatorStringRunning="----------------------- RENDERING --------------- ";
 
 PImage Image;
 PFont font;
@@ -50,13 +50,13 @@ float T2FontScaleFactor=1.5;
 
 int originalWidth=500, originalHeight=350; // initial size of the window
 int InputWidth, InputHeight; // dimensions of the original picture
-int CanvasWidth, CanvasHeight; // dimensions of the output canvas (the part of the output window where we're going to draw)
+int CanvasWidth=originalWidth, CanvasHeight=originalHeight; // dimensions of the output canvas (the part of the output window where we're going to draw)
 float InputAspectRatio, CanvasAspectRatio;
 
 int bgOpacity=30;
 
 // common controls
-Controller bgOpacitySlider, imageNameLabel, svgFileLabel, outputImgFileLabel, changeImageButton, outputImageChangeButton, svgChangeButton, textorizer1label, textorizer2label, currentFontLabel;
+Controller bgOpacitySlider, imageNameLabel, svgFileLabel, outputImgFileLabel, changeImageButton, outputImageChangeButton, svgChangeButton, textorizer1label, textorizer2label, currentFontLabel, outputWidthSlider;
 ScrollList fontSelector;
 
 // textorizer1 controls
@@ -113,9 +113,9 @@ void loadImage() {
     ImageFileName=newImageFileName;
     Image=newImage;
     InputWidth=Image.width; InputHeight=Image.height;
+    CanvasWidth=InputWidth; CanvasHeight=InputHeight;
     loadPixels(); 
     setTextLabelValue((Textlabel)imageNameLabel, ImageFileName);
-    //    ((Textlabel)imageNameLabel).setValue(ImageFileName);
   }
 }
 
@@ -141,16 +141,6 @@ void setup() {
   font = createFont(fontName, 32);
   textFont(font);
 
-  frame.setResizable(true);
-  // call draw() when the window is resized
-  frame.addComponentListener(new ComponentAdapter() { 
-    public void componentResized(ComponentEvent e) { 
-      if(e.getSource()==frame) { 
-        redraw();
-      } 
-    } 
-  });
-
   controlP5 = new ControlP5(this);
   controlP5.setAutoDraw(true);
   controlWindow = controlP5.addControlWindow("Textorizer",100,100,300,530);
@@ -160,14 +150,15 @@ void setup() {
   // common controls
   changeImageButton  = controlP5.addButton("Change Image >",4, 10,ypos-7, 75, 20); 
   imageNameLabel  = controlP5.addTextlabel("Image",ImageFileName, 90,ypos);
-  ypos+=20;
 
-  bgOpacitySlider = controlP5.addSlider("Background Opacity",0,255,bgOpacity, 10,ypos, SliderWidth ,15); ypos+=25;
 
-  svgChangeButton = controlP5.addButton("Change SVG >",4,10,ypos-7,67,20); 
+  ypos+=20; outputWidthSlider = controlP5.addSlider("Output Width",100,10000, originalWidth, 10,ypos,SliderWidth,15);
+  ypos+=20; bgOpacitySlider = controlP5.addSlider("Background Opacity",0,255,bgOpacity, 10,ypos, SliderWidth ,15); 
+
+  ypos+=25; svgChangeButton = controlP5.addButton("Change SVG >",4,10,ypos-7,67,20); 
   svgFileLabel = controlP5.addTextlabel("Svg",SvgFileName,80,ypos);
-  ypos+=25; 
 
+  ypos+=25; 
   outputImgFileLabel = controlP5.addTextlabel("Img",OutputImageFileName,123,ypos); 
   outputImageChangeButton = controlP5.addButton("Change Output Image >",4,10,ypos-7,110,20);
   ypos+=25;
@@ -193,6 +184,7 @@ void setup() {
   fontSelector.moveTo(controlWindow);
 
   bgOpacitySlider.setWindow(controlWindow);
+  outputWidthSlider.setWindow(controlWindow);
 
   // Textorizer 1 controls
   textorizer1label = controlP5.addTextlabel("Textorizer1",t1SeparatorStringIdle, 10,ypos);
@@ -243,6 +235,7 @@ void setup() {
   t1numSlider.setId(1); 
   t1thresholdSlider.setId(2); 
   bgOpacitySlider.setId(3);
+  outputWidthSlider.setId(5);
   t1FontScaleRange.setId(4);
   fontSelector.setId(6);
   changeImageButton.setId(7);
@@ -263,28 +256,25 @@ void setup() {
 void draw()
 {
   t1goButton.hide(); t2goButton.hide();
-  setTextLabelValue((Textlabel)textorizer1label, t1SeparatorStringRunning);
-  setTextLabelValue((Textlabel)textorizer2label, t2SeparatorStringRunning);
-  //  ((Textlabel)textorizer1label).setValue(t1SeparatorStringRunning);    
-  //  ((Textlabel)textorizer2label).setValue(t2SeparatorStringRunning);    
-
 
   cursor(WAIT);
   background(255);
 
   if (Mode != 0) {
-    CanvasAspectRatio = float(width)/height;
-    InputAspectRatio = float(InputWidth)/InputHeight;
-    
-    if (CanvasAspectRatio > InputAspectRatio) {
-      CanvasWidth=int(height*InputAspectRatio);
-      CanvasHeight=height;
-    }
-    else {
-      CanvasWidth=width; 
-      CanvasHeight=int(width/InputAspectRatio);
-    }
-
+//    CanvasAspectRatio = float(width)/height;
+//    InputAspectRatio = float(InputWidth)/InputHeight;
+//    
+//    if (CanvasAspectRatio > InputAspectRatio) {
+//      CanvasWidth=int(height*InputAspectRatio);
+//      CanvasHeight=height;
+//    }
+//    else {
+//      CanvasWidth=width; 
+//      CanvasHeight=int(width/InputAspectRatio);
+//    }
+//
+    size(CanvasWidth, CanvasHeight);
+    frame.setSize(CanvasWidth>800?800:CanvasWidth, CanvasHeight>800?800:CanvasHeight);
     setupSvg();
     setupFont();
     setupBgPicture();
@@ -346,7 +336,7 @@ void setupBgPicture() {
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 void textorize() {
-  int x,y,tx,ty;
+  int x,y,tx,ty, progress;
   float dx,dy,dmag2,vnear,b,textScale,dir,r;
   color v,p;
   String word;
@@ -355,6 +345,9 @@ void textorize() {
   Words=loadStrings(T1WordsFileName);
 
   for (int h=0; h<NStrokes;h++) {
+    progress = 1+int(100.0*h/NStrokes);
+    setTextLabelValue((Textlabel)textorizer1label, t1SeparatorStringRunning + progress + "%");
+
     x=int(random(2,InputWidth-3));
     y=int(random(2,InputHeight-3));
     v=Image.pixels[x+y*InputWidth];
@@ -438,6 +431,12 @@ void controlEvent(ControlEvent theEvent) {
       controlWindow.update();
       controlWindow.show(); // shouldn't be needed but window won't refresh otherwise
     }
+  } else if (id==5) { // output width
+    CanvasWidth = ((int)(theEvent.controller().value()));
+    CanvasHeight = CanvasWidth * InputHeight / InputWidth;
+    //    size(CanvasWidth, CanvasHeight);
+    //    frame.setSize(CanvasWidth, CanvasHeight);
+    //    redraw();
   } else if (id==7) { // changeImageButton
     loadImage();
   } else if (id==8) { // svgChangeButton
@@ -539,7 +538,7 @@ void textorize2()
   text=textbuffer.toString();
 
   int nbletters = text.length();
-  int ti=0;
+  int ti=0, progress;
   float x,y;
   float scale, r,g,b;
   char c, charToPrint;
@@ -548,6 +547,9 @@ void textorize2()
   float imgScaleFactorY = float(Image.height)/CanvasHeight;
 
   for (y=0; y < CanvasHeight; y+=T2FontSize*T2LineHeight) {
+    progress = 1+int(100*y/CanvasHeight);
+    setTextLabelValue((Textlabel)textorizer2label, t2SeparatorStringRunning + progress + "%");
+
     x=0;
 
     // skip any white space at the beginning of the line
