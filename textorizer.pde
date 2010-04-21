@@ -151,7 +151,7 @@ void setup() {
 
   controlP5 = new ControlP5(this);
   controlP5.setAutoDraw(true);
-  controlWindow = controlP5.addControlWindow("Textorizer",100,100,300,600);
+  controlWindow = controlP5.addControlWindow("Textorizer",100,100,300,530);
   controlWindow.setBackground(color(40));
   controlWindow.setUpdateMode(ControlWindow.NORMAL);
 
@@ -160,7 +160,7 @@ void setup() {
   imageNameLabel  = controlP5.addTextlabel("Image",ImageFileName, 90,ypos);
   ypos+=20;
 
-  bgOpacitySlider = controlP5.addSlider("Background Opacity",0,255,bgOpacity, 10,ypos, 100,20); ypos+=30;
+  bgOpacitySlider = controlP5.addSlider("Background Opacity",0,255,bgOpacity, 10,ypos, 100,15); ypos+=25;
 
   svgChangeButton = controlP5.addButton("Change SVG >",4,10,ypos-7,67,20); 
   svgFileLabel = controlP5.addTextlabel("Svg",SvgFileName,80,ypos);
@@ -168,7 +168,7 @@ void setup() {
 
   outputImgFileLabel = controlP5.addTextlabel("Img",OutputImageFileName,123,ypos); 
   outputImageChangeButton = controlP5.addButton("Change Output Image >",4,10,ypos-7,110,20);
-  ypos+=30;
+  ypos+=25;
 
   currentFontLabel = controlP5.addTextlabel("CurrentFont","Font: "+fontName,10,ypos); ypos+=20; 
 
@@ -195,12 +195,12 @@ void setup() {
   // Textorizer 1 controls
   textorizer1label = controlP5.addTextlabel("Textorizer1",t1SeparatorStringIdle, 10,ypos);
   textorizer1label.setWindow(controlWindow);
-  ypos+=20; t1numSlider=controlP5.addSlider("Number of Strokes",100,10000,1000, 10, ypos, 100,20);
-  ypos+=25; t1thresholdSlider=controlP5.addSlider("Threshold",0,200,100, 10,ypos, 100,20);
-  ypos+=25; t1minFontSlider  =controlP5.addSlider("Min Font Scale",0,50, minFontScale, 10, ypos, 100,20);
-  ypos+=25; t1maxFontSlider  =controlP5.addSlider("Max Font Scale",0,50, maxFontScale, 10,ypos, 100,20);
+  ypos+=20; t1numSlider=controlP5.addSlider("Number of Strokes",100,10000,1000, 10, ypos, 100,15);
+  ypos+=20; t1thresholdSlider=controlP5.addSlider("Threshold",0,200,100, 10,ypos, 100,15);
+  ypos+=20; t1minFontSlider  =controlP5.addSlider("Min Font Scale",0,50, minFontScale, 10, ypos, 100,15);
+  ypos+=20; t1maxFontSlider  =controlP5.addSlider("Max Font Scale",0,50, maxFontScale, 10,ypos, 100,15);
 
-  ypos+=30; 
+  ypos+=27; 
   t1changeWordsButton = controlP5.addButton("Change Words >",4, 10,ypos-7, 80, 20); 
   t1wordsFileName  =controlP5.addTextlabel("Words",((T1WordsFileName==null)?"":T1WordsFileName), 95,ypos); 
   ypos+=15;
@@ -218,24 +218,25 @@ void setup() {
 
 
   // Textorizer 2 controls
-  ypos+=30;textorizer2label = controlP5.addTextlabel("Textorizer2",t2SeparatorStringIdle, 10,ypos);
+  ypos+=10;textorizer2label = controlP5.addTextlabel("Textorizer2",t2SeparatorStringIdle, 10,ypos);
   textorizer2label.setWindow(controlWindow);
-  ypos+=20;t2textSize=controlP5.addSlider("Text Size",4,50,T2FontSize, 10,ypos, 100,20); t2textSize.setWindow(controlWindow);
-  ypos+=25;t2lineHeight=controlP5.addSlider("Line Height",.5,3,T2LineHeight, 10,ypos, 100,20); t2lineHeight.setWindow(controlWindow);
-  ypos+=25;t2colorAdjustment=controlP5.addSlider("Colour Saturation",0,255,T2ColourAdjustment, 10,ypos, 100,20); t2colorAdjustment.setWindow(controlWindow);
-  ypos+=25;
-  t2kerningSlider=controlP5.addSlider("Kerning",-.5,.5,T2Kerning, 10,ypos, 100,20); t2kerningSlider.setWindow(controlWindow);
-  ypos+=25;
-  t2fontScaleFactorSlider=controlP5.addSlider("Font Scale",0,5,T2FontScaleFactor, 10,ypos, 100,20); t2fontScaleFactorSlider.setWindow(controlWindow);
+  ypos+=20;t2textSize=controlP5.addSlider("Text Size",4,50,T2FontSize, 10,ypos, 100,15); t2textSize.setWindow(controlWindow);
+  ypos+=20;t2lineHeight=controlP5.addSlider("Line Height",.5,3,T2LineHeight, 10,ypos, 100,15); t2lineHeight.setWindow(controlWindow);
+  ypos+=20;t2colorAdjustment=controlP5.addSlider("Colour Saturation",0,255,T2ColourAdjustment, 10,ypos, 100,15); t2colorAdjustment.setWindow(controlWindow);
+  ypos+=20;
+  t2kerningSlider=controlP5.addSlider("Kerning",-.5,.5,T2Kerning, 10,ypos, 100,15); t2kerningSlider.setWindow(controlWindow);
+  ypos+=20;
+  t2fontScaleFactorSlider=controlP5.addSlider("Font Scale",0,5,T2FontScaleFactor, 10,ypos, 100,15); t2fontScaleFactorSlider.setWindow(controlWindow);
 
-  ypos+=35; 
+  ypos+=27; 
   t2changeTextButton = controlP5.addButton("Change Text >",4, 10,ypos-7, 70, 20); t2changeTextButton.setWindow(controlWindow);
   t2textFileName = controlP5.addTextlabel("Text",((T2TextFileName==null)?"":T2TextFileName), 85,ypos); t2textFileName.setWindow(controlWindow);
 
   t2goButton=controlP5.addButton("Textorize2!",4, 235,460, 55,20); t2goButton.setWindow(controlWindow);
 
   // info label
-  controlP5.addTextlabel("About","------ Textorizer - http://lapin-bleu.net/software/textorizer ------", 0,590).setWindow(controlWindow);
+  ypos+=25;
+  controlP5.addTextlabel("About","-------- http://lapin-bleu.net/software/textorizer --------", 20,ypos).setWindow(controlWindow);
   
 
 
