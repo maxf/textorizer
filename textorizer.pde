@@ -14,7 +14,9 @@ import javax.swing.*;
 ControlP5 controlP5;
 ControlWindow controlWindow; // the controls must be in a separate window, since the controls window must refresh constantly, while the rendering window only refreshes when you tell it to.
 
-String ImageFileName="jetlag.jpg";
+int SliderWidth = 150;
+
+String ImageFileName="opera.jpg";
 String T1WordsFileName="textorizer.txt";
 String T2TextFileName="textorizer2.txt";
 String fontName="FFScala";
@@ -58,7 +60,7 @@ Controller bgOpacitySlider, imageNameLabel, svgFileLabel, outputImgFileLabel, ch
 ScrollList fontSelector;
 
 // textorizer1 controls
-Controller t1numSlider, t1thresholdSlider, t1minFontSlider, t1maxFontSlider, t1goButton, t1wordsFileName, t1changeWordsButton;
+Controller t1numSlider, t1thresholdSlider, t1FontScaleRange, t1goButton, t1wordsFileName, t1changeWordsButton;
 
 // textorizer2 controls
 Controller t2lineHeight, t2textSize, t2colorAdjustment, t2goButton, t2textFileName, t2textFileLabel, t2changeTextButton, t2kerningSlider, t2fontScaleFactorSlider;
@@ -160,7 +162,7 @@ void setup() {
   imageNameLabel  = controlP5.addTextlabel("Image",ImageFileName, 90,ypos);
   ypos+=20;
 
-  bgOpacitySlider = controlP5.addSlider("Background Opacity",0,255,bgOpacity, 10,ypos, 100,15); ypos+=25;
+  bgOpacitySlider = controlP5.addSlider("Background Opacity",0,255,bgOpacity, 10,ypos, SliderWidth ,15); ypos+=25;
 
   svgChangeButton = controlP5.addButton("Change SVG >",4,10,ypos-7,67,20); 
   svgFileLabel = controlP5.addTextlabel("Svg",SvgFileName,80,ypos);
@@ -195,10 +197,9 @@ void setup() {
   // Textorizer 1 controls
   textorizer1label = controlP5.addTextlabel("Textorizer1",t1SeparatorStringIdle, 10,ypos);
   textorizer1label.setWindow(controlWindow);
-  ypos+=20; t1numSlider=controlP5.addSlider("Number of Strokes",100,10000,1000, 10, ypos, 100,15);
-  ypos+=20; t1thresholdSlider=controlP5.addSlider("Threshold",0,200,100, 10,ypos, 100,15);
-  ypos+=20; t1minFontSlider  =controlP5.addSlider("Min Font Scale",0,50, minFontScale, 10, ypos, 100,15);
-  ypos+=20; t1maxFontSlider  =controlP5.addSlider("Max Font Scale",0,50, maxFontScale, 10,ypos, 100,15);
+  ypos+=20; t1numSlider=controlP5.addSlider("Number of Strokes",100,10000,1000, 10, ypos, SliderWidth,15);
+  ypos+=20; t1thresholdSlider=controlP5.addSlider("Threshold",0,200,SliderWidth, 10,ypos, SliderWidth,15);
+  ypos+=20; t1FontScaleRange = controlP5.addRange("Font Range",0,50,minFontScale,maxFontScale, 10,ypos,SliderWidth,15);
 
   ypos+=27; 
   t1changeWordsButton = controlP5.addButton("Change Words >",4, 10,ypos-7, 80, 20); 
@@ -210,8 +211,7 @@ void setup() {
 
   t1numSlider.setWindow(controlWindow);
   t1thresholdSlider.setWindow(controlWindow);
-  t1minFontSlider.setWindow(controlWindow);
-  t1maxFontSlider.setWindow(controlWindow);
+  t1FontScaleRange.setWindow(controlWindow);
   t1wordsFileName.setWindow(controlWindow);
   t1changeWordsButton.setWindow(controlWindow);
   t1goButton.setWindow(controlWindow);
@@ -220,13 +220,13 @@ void setup() {
   // Textorizer 2 controls
   ypos+=10;textorizer2label = controlP5.addTextlabel("Textorizer2",t2SeparatorStringIdle, 10,ypos);
   textorizer2label.setWindow(controlWindow);
-  ypos+=20;t2textSize=controlP5.addSlider("Text Size",4,50,T2FontSize, 10,ypos, 100,15); t2textSize.setWindow(controlWindow);
-  ypos+=20;t2lineHeight=controlP5.addSlider("Line Height",.5,3,T2LineHeight, 10,ypos, 100,15); t2lineHeight.setWindow(controlWindow);
-  ypos+=20;t2colorAdjustment=controlP5.addSlider("Colour Saturation",0,255,T2ColourAdjustment, 10,ypos, 100,15); t2colorAdjustment.setWindow(controlWindow);
+  ypos+=20;t2textSize=controlP5.addSlider("Text Size",4,50,T2FontSize, 10,ypos, SliderWidth,15); t2textSize.setWindow(controlWindow);
+  ypos+=20;t2lineHeight=controlP5.addSlider("Line Height",.5,3,T2LineHeight, 10,ypos, SliderWidth,15); t2lineHeight.setWindow(controlWindow);
+  ypos+=20;t2colorAdjustment=controlP5.addSlider("Colour Saturation",0,255,T2ColourAdjustment, 10,ypos, SliderWidth,15); t2colorAdjustment.setWindow(controlWindow);
   ypos+=20;
-  t2kerningSlider=controlP5.addSlider("Kerning",-.5,.5,T2Kerning, 10,ypos, 100,15); t2kerningSlider.setWindow(controlWindow);
+  t2kerningSlider=controlP5.addSlider("Kerning",-.5,.5,T2Kerning, 10,ypos, SliderWidth,15); t2kerningSlider.setWindow(controlWindow);
   ypos+=20;
-  t2fontScaleFactorSlider=controlP5.addSlider("Font Scale",0,5,T2FontScaleFactor, 10,ypos, 100,15); t2fontScaleFactorSlider.setWindow(controlWindow);
+  t2fontScaleFactorSlider=controlP5.addSlider("Font Scale",0,5,T2FontScaleFactor, 10,ypos, SliderWidth,15); t2fontScaleFactorSlider.setWindow(controlWindow);
 
   ypos+=27; 
   t2changeTextButton = controlP5.addButton("Change Text >",4, 10,ypos-7, 70, 20); t2changeTextButton.setWindow(controlWindow);
@@ -243,8 +243,7 @@ void setup() {
   t1numSlider.setId(1); 
   t1thresholdSlider.setId(2); 
   bgOpacitySlider.setId(3);
-  t1minFontSlider.setId(4); 
-  t1maxFontSlider.setId(5); 
+  t1FontScaleRange.setId(4);
   fontSelector.setId(6);
   changeImageButton.setId(7);
   svgChangeButton.setId(8);
@@ -431,18 +430,11 @@ void controlEvent(ControlEvent theEvent) {
   } else if (id==3) {
     bgOpacity=((int)(theEvent.controller().value()));
   } else if (id==4) {
-      minFontScale=((int)(theEvent.controller().value()));
-      if (minFontScale > maxFontScale) {
-        minFontScale=maxFontScale;
-        t1minFontSlider.setValue(minFontScale);
-        controlWindow.update();
-        controlWindow.show(); // shouldn't be needed but window won't refresh otherwise
-      }
-  } else if (id==5) {
-    maxFontScale=((int)(theEvent.controller().value()));
+    minFontScale = ((Range)t1FontScaleRange).lowValue();
+    maxFontScale = ((Range)t1FontScaleRange).highValue();
     if (minFontScale > maxFontScale) {
       minFontScale=maxFontScale;
-      t1minFontSlider.setValue(minFontScale);
+      ((Range)t1FontScaleRange).setLowValue(minFontScale);
       controlWindow.update();
       controlWindow.show(); // shouldn't be needed but window won't refresh otherwise
     }
@@ -548,24 +540,23 @@ void textorize2()
 
   int nbletters = text.length();
   int ti=0;
-  int x,y;
-  float rx, scale, r,g,b;
+  float x,y;
+  float scale, r,g,b;
   char c, charToPrint;
   color pixel;
   float imgScaleFactorX = float(Image.width)/CanvasWidth;
   float imgScaleFactorY = float(Image.height)/CanvasHeight;
 
   for (y=0; y < CanvasHeight; y+=T2FontSize*T2LineHeight) {
-    rx=1;
+    x=0;
 
     // skip any white space at the beginning of the line
     while (text.charAt(ti%nbletters) == ' ') ti++; 
 
 
-    while (rx<CanvasWidth) {
-      x=(int)floor(rx)-1;
+    while (x<CanvasWidth) {
 
-      pixel = pixelAverageAt(int(x*imgScaleFactorX), int(y*imgScaleFactorY), 1);
+      pixel = pixelAverageAt(int(x*imgScaleFactorX), int(y*imgScaleFactorY), int(T2FontSize*T2FontScaleFactor/6));
 
       r=red(pixel); g=green(pixel); b=blue(pixel);
 
@@ -587,18 +578,21 @@ void textorize2()
           fill(charColour);
         }
 
+        // empirically shift letter to the top-left, since sampled pixel is on its top-left corner
+        float realX = x-T2FontSize/2.0, realY = y+3+T2FontSize*T2LineHeight-T2FontSize/4.0;
+
         textSize(T2FontSize * (1 + T2FontScaleFactor*pow(scale-1,3)));
-        text(charToPrint, x, y+T2FontSize*T2LineHeight);
+        text(charToPrint, int(realX), int(realY));
 
         r=red(charColour); g=green(charColour); b=blue(charColour);
-        SvgBuffer.append("<text x='"+rx+"' y='"+(y+T2FontSize*T2LineHeight)+"' font-size='"+(T2FontSize*scale)+"' fill='rgb("+int(r)+","+int(g)+","+int(b)+")'>"+charToPrint+"</text>\n");
+        SvgBuffer.append("<text x='"+realX+"' y='"+realY+"' font-size='"+(T2FontSize*scale)+"' fill='rgb("+int(r)+","+int(g)+","+int(b)+")'>"+charToPrint+"</text>\n");
         
-        rx+=textWidth(Character.toString(c)) * (1+T2Kerning);
+        x+=textWidth(Character.toString(c)) * (1+T2Kerning);
         ti++; // next letter
       } 
       else {
         // advance one em 
-        rx+=textWidth(" ") * (1+T2Kerning);
+        x+=textWidth(" ") * (1+T2Kerning);
       }
     }
   }
