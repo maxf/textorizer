@@ -148,10 +148,9 @@ void setup() {
   Font = createFont(FontName, 32);
 
   controlP5 = new ControlP5(this);
-  controlWindow = controlP5.addControlWindow("Textorizer",100,100,300,530);
-  controlWindow.setBackground(color(40));
+  controlWindow = controlP5.addControlWindow("Textorizer",300,530);
+  controlWindow.setBackground(color(100));
   controlWindow.setUpdateMode(ControlWindow.NORMAL);
-  controlWindow.setTitle("Textorizer");
 
   // common controls
   changeImageButton  = controlP5.addButton("Change Image >",4, 10,ypos-7, 75, 20); 
@@ -233,10 +232,7 @@ void setup() {
   t2goButton=controlP5.addButton("Textorize2!",4, 235,460, 55,20); t2goButton.setWindow(controlWindow);
 
   // info label
-  ypos+=25;
-  controlP5.addTextlabel("About","-------- http://lapin-bleu.net/software/textorizer --------", 20,ypos).setWindow(controlWindow);
-  
-
+  ypos+=25; controlP5.addTextlabel("About","http://lapin-bleu.net/software/textorizer", 0,ypos).setWindow(controlWindow);
 
   t1numSlider.setId(1); 
   t1thresholdSlider.setId(2); 
@@ -294,12 +290,18 @@ void draw()
 
   // fit the image best in the window
   int fittingWidth, fittingHeight;
-  if (float(width)/height > (float)InputImage.width/InputImage.height) {
-    fittingHeight = height;
-    fittingWidth = fittingHeight*InputImage.width/InputImage.height;
+
+  if (width >= OutputImageWidth && height >= OutputImageHeight) {
+    fittingWidth = OutputImageWidth;
+    fittingHeight = OutputImageHeight;
   } else {
-    fittingWidth = width;
-    fittingHeight = fittingWidth*InputImage.height/InputImage.width;
+    if (float(width)/height > (float)OutputImageWidth/OutputImageHeight) {
+      fittingHeight = height;
+      fittingWidth = fittingHeight*OutputImageWidth/OutputImageHeight;
+    } else {
+      fittingWidth = width;
+      fittingHeight = fittingWidth*OutputImageHeight/OutputImageWidth;
+    }
   }
 
   image(OutputImage, 0, 0, fittingWidth, fittingHeight);
