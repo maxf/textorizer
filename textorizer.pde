@@ -79,18 +79,18 @@ String[] SvgOutput;
 // ========================
 // Labels
 String LabelChange = "CHANGE";
-String LabelInputImageFileName = "Input Image: ";
+String LabelInputImageFileName = "Input image: ";
 String LabelOutputWidth = "OUTPUT IMAGE SIZE";
 String LabelBackgroundOpacity = "BACKGROUND OPACITY";
-String LabelSVGOutputFileName = "SVG Output File: ";
-String LabelOutputImageFileName = "Output Image: ";
+String LabelSVGOutputFileName = "SVG output file: ";
+String LabelOutputImageFileName = "Output image: ";
 String LabelFont = "Font: ";
 String LabelSelectFont = "Select Font";
 String LabelT1SeparatorIdle =  "---------------------- Textorizer 1 --------------------";
 String LabelT2SeparatorIdle =  "---------------------- Textorizer 2 --------------------";
 String LabelT1SeparatorRunning="----------------------- RENDERING --------------- ";
 String LabelT2SeparatorRunning="----------------------- RENDERING --------------- ";
-String LabelT1WordsFile = "Words File (TXT format): ";
+String LabelT1WordsFile = "Words file (TXT format): ";
 String LabelT1NbStrokes = "Number of Strokes";
 String LabelT1Threshold = "Threshold";
 String LabelT1FontRange = "Font Range";
@@ -101,7 +101,7 @@ String LabelT2LineHeight = "Line Height";
 String LabelT2ColourSaturation = "Colour Saturation";
 String LabelT2Kerning = "Kerning";
 String LabelT2FontScale = "Font Scale";
-String LabelT2TextFile = "Text File (TXT format): ";
+String LabelT2TextFile = "Text file (TXT format): ";
 String LabelInfo = "-- http://lapin-bleu.net/software/textorizer - max@lapin-bleu.net --";
 
 // ########################
@@ -182,7 +182,8 @@ void setup() {
   changeImageButton.setLabel(LabelChange);
 
 
-  ypos+=15; outputWidthSlider = controlP5.addSlider("Output Width",100,5000, OutputImageWidth, 10,ypos,SliderWidth,15);
+  ypos+=15; outputWidthSlider = controlP5.addSlider("outputWidthSlider",100,5000, OutputImageWidth, 10,ypos,SliderWidth,15);
+  outputWidthSlider.setLabel(LabelOutputWidth);
   ypos+=20; bgOpacitySlider = controlP5.addSlider("Background Opacity",0,255, OutputBackgroundOpacity, 10,ypos, SliderWidth ,15); 
 
   ypos+=25; 
@@ -381,19 +382,9 @@ void setupFont() {
 }
 
 void setupBgPicture() {
-  // background picture
-  float bgScale;
-
-  if (float(OutputImageWidth)/OutputImageHeight > float(InputImage.width)/InputImage.height)
-    bgScale =float(OutputImageWidth)/InputImage.height;
-  else
-    bgScale=float(OutputImageWidth)/InputImage.width;
-
-  OutputImage.pushMatrix();
-  OutputImage.scale(bgScale, bgScale);
+  // add background picture with requested level of opacity
   OutputImage.tint(255,OutputBackgroundOpacity);
-  OutputImage.image(InputImage,0,0);
-  OutputImage.popMatrix();
+  OutputImage.image(InputImage,0,0,OutputImageWidth,OutputImageHeight);
   SvgBuffer.append("<image x='0' y='0' width='"+OutputImageWidth+"' height='"+OutputImageHeight+"' opacity='"+OutputBackgroundOpacity/255.0+"' xlink:href='"+InputImageFileName+"'/>\n");
 }
 
