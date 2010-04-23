@@ -15,10 +15,6 @@ import javax.swing.*;
 ControlP5 controlP5;
 ControlWindow controlWindow; // the controls must be in a separate window, since the controls window must refresh constantly, while the rendering window only refreshes when you tell it to.
 int SliderWidth = 150;
-String t1SeparatorStringIdle=   "---------------------- Textorizer 1 --------------------";
-String t2SeparatorStringIdle=   "---------------------- Textorizer 2 --------------------";
-String t1SeparatorStringRunning="----------------------- RENDERING --------------- ";
-String t2SeparatorStringRunning="----------------------- RENDERING --------------- ";
 String[] fontList = PFont.list();
 // common controls
 Controller bgOpacitySlider, imageNameLabel, svgFileLabel, outputImgFileLabel, changeImageButton, outputImageChangeButton, svgChangeButton, textorizer1label, textorizer2label, currentFontLabel, outputWidthSlider;
@@ -80,6 +76,34 @@ String SvgFileName = "textorizer.svg";
 StringBuffer SvgBuffer;
 String[] SvgOutput;
 
+// ========================
+// Labels
+String LabelChange = "CHANGE";
+String LabelInputImageFileName = "Input Image: ";
+String LabelOutputWidth = "OUTPUT IMAGE SIZE";
+String LabelBackgroundOpacity = "BACKGROUND OPACITY";
+String LabelSVGOutputFileName = "SVG Output File: ";
+String LabelOutputImageFileName = "Output Image: ";
+String LabelFont = "Font: ";
+String LabelSelectFont = "Select Font";
+String LabelT1SeparatorIdle =  "---------------------- Textorizer 1 --------------------";
+String LabelT2SeparatorIdle =  "---------------------- Textorizer 2 --------------------";
+String LabelT1SeparatorRunning="----------------------- RENDERING --------------- ";
+String LabelT2SeparatorRunning="----------------------- RENDERING --------------- ";
+String LabelT1WordsFile = "Words File (TXT format): ";
+String LabelT1NbStrokes = "Number of Strokes";
+String LabelT1Threshold = "Threshold";
+String LabelT1FontRange = "Font Range";
+String LabelT1Go = "Textorize!";
+String LabelT2Go = "Textorize2!";
+String LabelT2TextSize = "Text Size";
+String LabelT2LineHeight = "Line Height";
+String LabelT2ColourSaturation = "Colour Saturation";
+String LabelT2Kerning = "Kerning";
+String LabelT2FontScale = "Font Scale";
+String LabelT2TextFile = "Text File (TXT format): ";
+String LabelInfo = "-- http://lapin-bleu.net/software/textorizer - max@lapin-bleu.net --";
+
 // ########################
 
 void loadWords(int mode) {
@@ -93,8 +117,7 @@ void loadWords(int mode) {
     if (newWords != null) {
       T1WordsFileName = newWordsFileName;
       Words = newWords;
-      setTextLabelValue((Textlabel)t1wordsFileName, T1WordsFileName);
-      // ((Textlabel)t1wordsFileName).setValue(T1WordsFileName);
+      setTextLabelValue((Textlabel)t1wordsFileName, LabelT1WordsFile+T1WordsFileName);
     }
     break;
   case 2: // textorizer 2
@@ -103,8 +126,7 @@ void loadWords(int mode) {
     if (newWords != null) {
       T2TextFileName = newWordsFileName;
       Words = newWords;
-      setTextLabelValue((Textlabel)t2textFileName, T2TextFileName);
-      //      ((Textlabel)t2textFileName).setValue(T2TextFileName);
+      setTextLabelValue((Textlabel)t2textFileName, LabelT2TextFile+T2TextFileName);
     }
     break;
   }
@@ -117,7 +139,7 @@ PImage loadInputImage(String filename) {
   if (newImage!=null && newImage.width!=-1 && newImage.height!=-1) {
     InputImageFileName=newImageFileName;
     loadPixels(); 
-    setTextLabelValue((Textlabel)imageNameLabel, filename);
+    setTextLabelValue((Textlabel)imageNameLabel, "Input Image: "+newImageFileName);
   }
   return newImage;
 }
@@ -140,38 +162,50 @@ void setup() {
   background(0);
   stroke(1);
   fill(0);
+  imageMode(CENTER);
   smooth();
   noLoop();
+
 
   InputImage = loadImage(InputImageFileName);
   loadPixels();
   Font = createFont(FontName, 32);
 
   controlP5 = new ControlP5(this);
-  controlWindow = controlP5.addControlWindow("Textorizer",300,530);
+  controlWindow = controlP5.addControlWindow("Textorizer",300,515);
   controlWindow.setBackground(color(100));
   controlWindow.setUpdateMode(ControlWindow.NORMAL);
 
   // common controls
-  changeImageButton  = controlP5.addButton("Change Image >",4, 10,ypos-7, 75, 20); 
-  imageNameLabel  = controlP5.addTextlabel("Image",InputImageFileName, 90,ypos);
+  imageNameLabel  = controlP5.addTextlabel("imageNameLabel",LabelInputImageFileName+InputImageFileName, 50,ypos);
+  changeImageButton  = controlP5.addButton("changeImageButton",4, 10, ypos-3, 37, 12);
+  changeImageButton.setLabel(LabelChange);
 
 
-  ypos+=20; outputWidthSlider = controlP5.addSlider("Output Width",100,10000, OutputImageWidth, 10,ypos,SliderWidth,15);
+  ypos+=15; outputWidthSlider = controlP5.addSlider("Output Width",100,5000, OutputImageWidth, 10,ypos,SliderWidth,15);
   ypos+=20; bgOpacitySlider = controlP5.addSlider("Background Opacity",0,255, OutputBackgroundOpacity, 10,ypos, SliderWidth ,15); 
 
-  ypos+=25; svgChangeButton = controlP5.addButton("Change SVG >",4,10,ypos-7,67,20); 
-  svgFileLabel = controlP5.addTextlabel("Svg",SvgFileName,80,ypos);
-
   ypos+=25; 
-  outputImgFileLabel = controlP5.addTextlabel("Img",OutputImageFileName,123,ypos); 
-  outputImageChangeButton = controlP5.addButton("Change Output Image >",4,10,ypos-7,110,20);
-  ypos+=25;
+  svgFileLabel = controlP5.addTextlabel("svgFileLabel", 
+                                        LabelSVGOutputFileName+SvgFileName,50,ypos);
+  svgChangeButton = controlP5.addButton("svgChangeButton",4,10,ypos-3,37,12); 
+  svgChangeButton.setLabel(LabelChange);
 
-  currentFontLabel = controlP5.addTextlabel("CurrentFont","Font: "+FontName,10,ypos); ypos+=20; 
+  ypos+=20; 
+  outputImgFileLabel = 
+    controlP5.addTextlabel("OutputImageFileName",
+                           LabelOutputImageFileName+OutputImageFileName,
+                           50, ypos); 
+  outputImageChangeButton = controlP5.addButton("outputImageChangeButton",
+                                                4,10,ypos-3,37,12);
+  outputImageChangeButton.setLabel(LabelChange);
 
-  fontSelector = controlP5.addScrollList("Select Font",10,ypos, 200,100); ypos+=110;
 
+  ypos+=20;
+  currentFontLabel = controlP5.addTextlabel("currentFontLabel",
+                                            LabelFont+FontName,10,ypos); 
+  ypos+=20; 
+  fontSelector = controlP5.addScrollList(LabelSelectFont,10,ypos, 200,100); 
 
   for (int i=0;i<fontList.length;i++) {
     String fontNameAscii = fontList[i].replaceAll("[^\\p{ASCII}]", " ");
@@ -179,6 +213,7 @@ void setup() {
     b.setId(1000+i);
   }
 
+  ypos+=110;
   imageNameLabel.setWindow(controlWindow);
   changeImageButton.setWindow(controlWindow);
   svgFileLabel.setWindow(controlWindow);
@@ -192,19 +227,27 @@ void setup() {
   outputWidthSlider.setWindow(controlWindow);
 
   // Textorizer 1 controls
-  textorizer1label = controlP5.addTextlabel("Textorizer1",t1SeparatorStringIdle, 10,ypos);
+  textorizer1label = controlP5.addTextlabel("Textorizer1",LabelT1SeparatorIdle, 10,ypos);
   textorizer1label.setWindow(controlWindow);
-  ypos+=20; t1numSlider=controlP5.addSlider("Number of Strokes",100,10000,1000, 10, ypos, SliderWidth,15);
-  ypos+=20; t1thresholdSlider=controlP5.addSlider("Threshold",0,200,SliderWidth, 10,ypos, SliderWidth,15);
-  ypos+=20; t1FontScaleRange = controlP5.addRange("Font Range",0,50,minFontScale,maxFontScale, 10,ypos,SliderWidth,15);
+  ypos+=20; t1numSlider=controlP5.addSlider(LabelT1NbStrokes,
+                                            100,10000,1000, 10, ypos, SliderWidth,15);
+  ypos+=20; t1thresholdSlider=controlP5.addSlider(LabelT1Threshold,
+                                                  0,200,SliderWidth, 10,ypos, SliderWidth,15);
+  ypos+=20; t1FontScaleRange = controlP5.addRange(LabelT1FontRange,
+                                                  0,50,minFontScale,maxFontScale, 10,ypos,SliderWidth,15);
 
   ypos+=27; 
-  t1changeWordsButton = controlP5.addButton("Change Words >",4, 10,ypos-7, 80, 20); 
-  t1wordsFileName  =controlP5.addTextlabel("Words",((T1WordsFileName==null)?"":T1WordsFileName), 95,ypos); 
+  t1changeWordsButton = controlP5.addButton("t1changeWordsButton",4, 10, ypos-3, 37, 12); 
+  t1changeWordsButton.setLabel(LabelChange);
+  t1wordsFileName = 
+    controlP5.addTextlabel("t1wordsFileName",
+                           ((T1WordsFileName==null)?"":LabelT1WordsFile+T1WordsFileName),
+                           50,ypos); 
   ypos+=15;
 
 
-  t1goButton=controlP5.addButton("Textorize!",4, 240,300, 50,20);
+  t1goButton=controlP5.addButton(LabelT1Go,
+                                 4, 240,300, 50,20);
 
   t1numSlider.setWindow(controlWindow);
   t1thresholdSlider.setWindow(controlWindow);
@@ -215,24 +258,27 @@ void setup() {
 
 
   // Textorizer 2 controls
-  ypos+=10;textorizer2label = controlP5.addTextlabel("Textorizer2",t2SeparatorStringIdle, 10,ypos);
+  ypos+=10;textorizer2label = controlP5.addTextlabel("Textorizer2",LabelT2SeparatorIdle, 10,ypos);
   textorizer2label.setWindow(controlWindow);
-  ypos+=20;t2textSize=controlP5.addSlider("Text Size",4,50,T2FontSize, 10,ypos, SliderWidth,15); t2textSize.setWindow(controlWindow);
-  ypos+=20;t2lineHeight=controlP5.addSlider("Line Height",.5,3,T2LineHeight, 10,ypos, SliderWidth,15); t2lineHeight.setWindow(controlWindow);
-  ypos+=20;t2colorAdjustment=controlP5.addSlider("Colour Saturation",0,255,T2ColourAdjustment, 10,ypos, SliderWidth,15); t2colorAdjustment.setWindow(controlWindow);
+  ypos+=20;t2textSize=controlP5.addSlider(LabelT2TextSize,4,50,T2FontSize, 10,ypos, SliderWidth,15); t2textSize.setWindow(controlWindow);
+  ypos+=20;t2lineHeight=controlP5.addSlider(LabelT2LineHeight,.5,3,T2LineHeight, 10,ypos, SliderWidth,15); t2lineHeight.setWindow(controlWindow);
+  ypos+=20;t2colorAdjustment=controlP5.addSlider(LabelT2ColourSaturation,0,255,T2ColourAdjustment, 10,ypos, SliderWidth,15); t2colorAdjustment.setWindow(controlWindow);
   ypos+=20;
-  t2kerningSlider=controlP5.addSlider("Kerning",-.5,.5,T2Kerning, 10,ypos, SliderWidth,15); t2kerningSlider.setWindow(controlWindow);
+  t2kerningSlider=controlP5.addSlider(LabelT2Kerning,-.5,.5,T2Kerning, 10,ypos, SliderWidth,15); t2kerningSlider.setWindow(controlWindow);
   ypos+=20;
-  t2fontScaleFactorSlider=controlP5.addSlider("Font Scale",0,5,T2FontScaleFactor, 10,ypos, SliderWidth,15); t2fontScaleFactorSlider.setWindow(controlWindow);
+  t2fontScaleFactorSlider=controlP5.addSlider(LabelT2FontScale,0,5,T2FontScaleFactor, 10,ypos, SliderWidth,15); t2fontScaleFactorSlider.setWindow(controlWindow);
 
   ypos+=27; 
-  t2changeTextButton = controlP5.addButton("Change Text >",4, 10,ypos-7, 70, 20); t2changeTextButton.setWindow(controlWindow);
-  t2textFileName = controlP5.addTextlabel("Text",((T2TextFileName==null)?"":T2TextFileName), 85,ypos); t2textFileName.setWindow(controlWindow);
+  t2changeTextButton = controlP5.addButton("t2changeTextButon",4, 10,ypos-3, 37, 12); 
+  t2changeTextButton.setLabel(LabelChange);
+  t2changeTextButton.setWindow(controlWindow);
+  t2textFileName = controlP5.addTextlabel("t2textFileName",((T2TextFileName==null)?"":LabelT2TextFile+T2TextFileName), 50,ypos); t2textFileName.setWindow(controlWindow);
 
-  t2goButton=controlP5.addButton("Textorize2!",4, 235,460, 55,20); t2goButton.setWindow(controlWindow);
+  t2goButton=controlP5.addButton(LabelT2Go,4, 235,440, 55,20); 
+  t2goButton.setWindow(controlWindow);
 
   // info label
-  ypos+=25; controlP5.addTextlabel("About","http://lapin-bleu.net/software/textorizer", 0,ypos).setWindow(controlWindow);
+  ypos+=25; controlP5.addTextlabel("About",LabelInfo, 0,ypos).setWindow(controlWindow);
 
   t1numSlider.setId(1); 
   t1thresholdSlider.setId(2); 
@@ -262,6 +308,7 @@ void go()
     OutputImage = createGraphics(OutputImageWidth, OutputImageHeight, P2D);
     OutputImage.beginDraw();
     OutputImage.background(255);
+    OutputImage.smooth();
     setupSvg();
     setupFont();
     setupBgPicture();
@@ -278,8 +325,8 @@ void go()
 void draw()
 {
   t1goButton.hide(); t2goButton.hide();
-  setTextLabelValue((Textlabel)textorizer1label, t1SeparatorStringRunning);
-  setTextLabelValue((Textlabel)textorizer2label, t2SeparatorStringRunning);
+  setTextLabelValue((Textlabel)textorizer1label, LabelT1SeparatorRunning);
+  setTextLabelValue((Textlabel)textorizer2label, LabelT2SeparatorRunning);
   cursor(WAIT);
   background(255);
 
@@ -304,11 +351,11 @@ void draw()
     }
   }
 
-  image(OutputImage, 0, 0, fittingWidth, fittingHeight);
+  image(OutputImage, width/2, height/2, fittingWidth, fittingHeight);
 
   cursor(ARROW);
-  setTextLabelValue((Textlabel)textorizer1label, t1SeparatorStringIdle);
-  setTextLabelValue((Textlabel)textorizer2label, t2SeparatorStringIdle);
+  setTextLabelValue((Textlabel)textorizer1label, LabelT1SeparatorIdle);
+  setTextLabelValue((Textlabel)textorizer2label, LabelT2SeparatorIdle);
   t1goButton.show(); t2goButton.show();
 }
 
@@ -363,7 +410,7 @@ void textorize() {
 
   for (int h=0; h<NStrokes;h++) {
     progress = 1+int(100.0*h/NStrokes);
-    setTextLabelValue((Textlabel)textorizer1label, t1SeparatorStringRunning + progress + "%");
+    setTextLabelValue((Textlabel)textorizer1label, LabelT1SeparatorRunning + progress + "%");
 
     x=int(random(2,InputImage.width-3));
     y=int(random(2,InputImage.height-3));
@@ -451,21 +498,16 @@ void controlEvent(ControlEvent theEvent) {
   } else if (id==5) { // output width
     OutputImageWidth = ((int)(theEvent.controller().value()));
     OutputImageHeight = OutputImageWidth * InputImage.height / InputImage.width;
-    //    size(OutputImageWidth, OutputImageHeight);
-    //    frame.setSize(OutputImageWidth, OutputImageHeight);
-    //    redraw();
   } else if (id==7) { // changeImageButton
     InputImage = loadInputImage(InputImageFileName);
   } else if (id==8) { // svgChangeButton
     SvgFileName = selectOutputFile(SvgFileName);
-    setTextLabelValue((Textlabel)svgFileLabel,SvgFileName);
-    //    ((Textlabel)svgFileLabel).setValue(SvgFileName);
+    setTextLabelValue((Textlabel)svgFileLabel,"SVG Output File: "+SvgFileName);
   } else if (id==9) { // outputImageChangeButton
     String s;
     OutputImageFileName = selectOutputFile(OutputImageFileName);
     setTextLabelValue((Textlabel)outputImgFileLabel, OutputImageFileName);
-    //    ((Textlabel)outputImgFileLabel).setValue(OutputImageFileName);
-  } else if (id==10) {
+  } else if (id==10) { // run textorizer 1
     TextorizerMode=1;
     NeedsRerendering=true;
     redraw();
@@ -543,7 +585,7 @@ void textorize2()
 
   for (y=0; y < OutputImageHeight; y+=T2FontSize*T2LineHeight) {
     progress = 1+int(100*y/OutputImageHeight);
-    setTextLabelValue((Textlabel)textorizer2label, t2SeparatorStringRunning + progress + "%");
+    setTextLabelValue((Textlabel)textorizer2label, LabelT2SeparatorRunning + progress + "%");
 
     x=0;
 
