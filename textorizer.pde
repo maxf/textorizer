@@ -147,7 +147,7 @@ PImage loadInputImage(String filename) {
   if (newImage!=null && newImage.width!=-1 && newImage.height!=-1) {
     InputImageFileName=newImageFileName;
     loadPixels(); 
-    setTextLabelValue(imageNameLabel, "Input Image: "+newImageFileName);
+    changeImageButton.setText(newImageFileName.substring(newImageFileName.lastIndexOf("/")+1));
   }
   return newImage;
 }
@@ -171,8 +171,8 @@ void setup() {
 //  stroke(1);
 //  fill(0);
 //  imageMode(CENTER);
-  smooth();
-  noLoop();
+//  smooth();
+//  noLoop();
 
 
   InputImage = loadImage(InputImageFileName);
@@ -182,15 +182,16 @@ void setup() {
 
   //  G4P.setFont(this, "Serif", 14);
   G4P.setColorScheme(this, GCScheme.GREEN_SCHEME);
-  canvas = new GWindow(this,"Textorizer",0,0,FrameWidth,FrameHeight,false,P2D);
+  canvas = new GWindow(this,"Textorizer",500,0,FrameWidth,FrameHeight,false,P2D);
   canvas.addData(canvasData);
   canvas.addDrawHandler(this,"canvasDraw");
   //  controlWindow.setUpdateMode(ControlWindow.NORMAL);
   //  controlWindow.addDrawHandler(this,"controlWindowDraw");
 
   // common controls
-  imageNameLabel  = new GLabel(this,LabelInputImageFileName+InputImageFileName,70,ypos,500);
-  changeImageButton  = new GButton(this,LabelChange, 10, ypos-3, 37, 12);
+  imageNameLabel  = new GLabel(this,LabelInputImageFileName,10,ypos,100);
+  changeImageButton  = new GButton(this,InputImageFileName,83,ypos,200,12);
+  changeImageButton.setTextAlign(GAlign.LEFT);
 
   ypos+=20; 
   outputWidthSlider = new GHorzSlider(this,10,ypos,SliderWidth,15);
@@ -303,7 +304,7 @@ void go()
 
 void draw()
 {
-  ;
+  background(0,192,0);
 }
 
 void canvasDraw(GWinApplet appc, GWinData data)
@@ -666,4 +667,3 @@ void setTextLabelValue(GLabel label, String text) {
 class CanvasWinData extends GWinData {
   public PGraphics img;
 }
-
