@@ -21,10 +21,10 @@ String[] fontList = PFont.list();
 // common controls
 TSlider outputWidthSlider, bgOpacitySlider;
 GLabel imageNameLabel, fontLabel, textLabel, statusLabel;
-GButton changeImageButton, svgSaveButton, pngSaveButton;
+GButton changeImageButton, svgSaveButton, pngSaveButton, textFileButton;
 GCombo fontSelector;
 GTextField textArea;
-GButton textLoadButton, textSaveButton;
+GButton textLoadButton, textSaveButton, textSaveAsButton;
 
 // textorizer1 controls
 GPanel t1Panel;
@@ -125,11 +125,22 @@ void loadWords(Boolean ask) {
   StringBuilder sb = new StringBuilder();
   for (int i=0;i<strings.length;i++) {
     sb.append(strings[i]);
-    sb.append("\n");
+    sb.append(System.getProperty("line.separator"));
   }
   Text = sb.toString();
   if (textArea!=null) textArea.setText(Text);
 }
+
+void saveText(Boolean saveAs) {
+  if (saveAs) {
+    TextFileName = selectOutputFile(TextFileName);
+  } 
+  String[] strings = new String[1];
+  strings[0] = Text;
+  saveStrings(TextFileName,strings);
+}
+
+
 
 PImage loadInputImage(String filename) {
   String newImageFileName = selectInputFile(filename);
@@ -149,15 +160,6 @@ void setup() {
   // Size has to be the very first statement, or setup() will be run twice
   size(300,700);
 
-//  frame.setResizable(true);  // call draw() when the window is resized
-//  frame.addComponentListener(new ComponentAdapter() { 
-//    public void componentResized(ComponentEvent e) { 
-//      if(e.getSource()==frame) { 
-//        redraw();
-//      } 
-//    } 
-//  });
-
 //  background(0);
 //  stroke(1);
 //  fill(0);
@@ -176,8 +178,14 @@ void setup() {
   canvas = new GWindow(this,"Textorizer",800,500,FrameWidth,FrameHeight,false,P2D);
   canvas.addData(canvasData);
   canvas.addDrawHandler(this,"canvasDrawHandler");
-  //  controlWindow.setUpdateMode(ControlWindow.NORMAL);
-  //  controlWindow.addDrawHandler(this,"controlWindowDraw");
+  canvas.addComponentListener(new ComponentAdapter() { 
+    public void componentResized(ComponentEvent e) { 
+      if(e.getSource()==canvas) { 
+        canvasApplet.redraw();
+      } 
+    } 
+  });
+
 
   // common controls
   imageNameLabel  = new GLabel(this,LabelInputImageFileName,LeftMargin,ypos,100);
@@ -194,10 +202,12 @@ void setup() {
 
   ypos+=25;
   textLabel = new GLabel(this,LabelText,LeftMargin,ypos,50);
-  textArea = new GTextField(this, Text, LeftMargin+40, ypos, 230, 100, true); 
+  textFileButton = new GButton(this,TextFileName,LeftMargin+50,ypos,230,12);
+  ypos+=25;
+  textArea = new GTextField(this, Text, LeftMargin+50, ypos, 230, 100, true); 
   textArea.setText(Text);
-  textLoadButton = new GButton(this,"Load",LeftMargin,ypos+20,35,12);
-  textSaveButton = new GButton(this,"Save",LeftMargin,ypos+40,35,12);
+  textSaveButton = new GButton(this,"Save",LeftMargin,ypos,35,12);
+  textSaveAsButton = new GButton(this,"Save as",LeftMargin,ypos+20,35,12);
 
   ypos+=120;
 
@@ -241,7 +251,7 @@ void setup() {
 
   // we have to put this at the bottom otherwise it shows behind the rest
   fontLabel = new GLabel(this,LabelFont,LeftMargin,savedypos,50); 
-  fontSelector = new GCombo(this,fontList,fontList.length,LeftMargin+40,savedypos,230);
+  fontSelector = new GCombo(this,fontList,fontList.length,LeftMargin+50,savedypos,230);
 }
 
 void go() 
@@ -441,8 +451,14 @@ void handleButtonEvents(GButton button) {
     TextorizerMode=2;
     NeedsRerendering=true;
     canvasDraw();
-  } else if (button == textLoadButton) {
+  } else if (button == textFileButton) {
     loadWords(true);
+    textFileButton.setText(TextFileName.substring(TextFileName.lastIndexOf("/")+1));
+  } else if (button == textSaveButton) {
+    saveText(false);
+  } else if (button == textSaveAsButton) {
+    saveText(true);
+    textFileButton.setText(TextFileName.substring(TextFileName.lastIndexOf("/")+1));
   }
 }
 
