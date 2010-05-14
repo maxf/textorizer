@@ -52,10 +52,9 @@ int OutputImageWidth = FrameWidth, OutputImageHeight = FrameHeight;
 int OutputBackgroundOpacity=30;
 String PngFileName="textorizer.png";
 
-String Text = "hello, this is textorizer";
+String Text;
 String FontName="FFScala";
-String T1WordsFileName="textorizer.txt";
-String T2TextFileName="textorizer2.txt";
+String TextFileName = "textorizer.txt";
 PFont Font;
 String[] Words;
 int NStrokes = 1000;
@@ -103,7 +102,6 @@ String LabelText = "Text: ";
 String LabelT1FontMin = "Min Font Size";
 String LabelT1FontMax = "Max Font Size";
 
-String LabelT1WordsFile = "Words file (TXT format): ";
 String LabelT1NbStrokes = "Strokes";
 String LabelT1Threshold = "Threshold";
 String LabelT1FontRange = "Font Range";
@@ -119,30 +117,18 @@ String LabelInfo = "-- http://lapin-bleu.net/software/textorizer - max@lapin-ble
 
 // ########################
 
-void loadWords(int mode) {
-  String newWordsFileName;
-  String[] newWords;
-
-  switch(mode) {
-  case 1: // textorizer 1
-    newWordsFileName = selectInputFile(T1WordsFileName);
-    newWords = loadStrings(newWordsFileName);
-    if (newWords != null) {
-      T1WordsFileName = newWordsFileName;
-      Words = newWords;
-      //      setTextLabelValue(t1wordsFileName, LabelT1WordsFile+T1WordsFileName);
-    }
-    break;
-  case 2: // textorizer 2
-    newWordsFileName = selectInputFile(T2TextFileName);
-    newWords = loadStrings(newWordsFileName);
-    if (newWords != null) {
-      T2TextFileName = newWordsFileName;
-      Words = newWords;
-      //      setTextLabelValue(t2textFileName, LabelT2TextFile+T2TextFileName);
-    }
-    break;
+void loadWords(Boolean ask) {
+  if (ask) {
+    TextFileName = selectInputFile(TextFileName);
+  } 
+  String[] strings = loadStrings(TextFileName);
+  StringBuilder sb = new StringBuilder();
+  for (int i=0;i<strings.length;i++) {
+    sb.append(strings[i]);
+    sb.append("\n");
   }
+  Text = sb.toString();
+  if (textArea!=null) textArea.setText(Text);
 }
 
 PImage loadInputImage(String filename) {
@@ -183,7 +169,7 @@ void setup() {
   InputImage = loadImage(InputImageFileName);
   loadPixels();
   Font = createFont(FontName, 32);
-
+  loadWords(false);
 
   //  G4P.setFont(this, "Serif", 14);
   G4P.setColorScheme(this, GCScheme.GREEN_SCHEME);
@@ -209,6 +195,7 @@ void setup() {
   ypos+=25;
   textLabel = new GLabel(this,LabelText,LeftMargin,ypos,50);
   textArea = new GTextField(this, Text, LeftMargin+40, ypos, 230, 100, true); 
+  textArea.setText(Text);
   textLoadButton = new GButton(this,"Load",LeftMargin,ypos+20,35,12);
   textSaveButton = new GButton(this,"Save",LeftMargin,ypos+40,35,12);
 
@@ -317,8 +304,6 @@ void canvasDraw()
     }
   }
 
-  println(fittingWidth+","+fittingHeight);
-  println(windowW/2+","+windowH/2);
   //  canvasApplet.imageMode(CENTER); doesn't seem to work
   //  canvasApplet.image(OutputImage, windowW/2+100, windowH/2+100, fittingWidth, fittingHeight);
   canvasApplet.image(OutputImage, 0, 0, fittingWidth, fittingHeight);
@@ -363,7 +348,7 @@ void textorize() {
   String word;
     
   fill(128);
-  Words=loadStrings(T1WordsFileName);
+  //  Words=loadStrings(T1WordsFileName);
   OutputImage.textFont(Font);
 
   for (int h=0; h<NStrokes;h++) {
@@ -456,6 +441,8 @@ void handleButtonEvents(GButton button) {
     TextorizerMode=2;
     NeedsRerendering=true;
     canvasDraw();
+  } else if (button == textLoadButton) {
+    loadWords(true);
   }
 }
 
@@ -526,18 +513,20 @@ String selectOutputFile(String defaultName)
 
 void textorize2()
 {
-  StringBuffer textbuffer = new StringBuffer();
-  String text;
+  //  StringBuffer textbuffer = new StringBuffer();
+  //  String text;
 
-  Words=loadStrings(T2TextFileName);
+  //  Words=loadStrings(T2TextFileName);
   fill(128);
 
-  textbuffer.append(Words[0]);
-  for (int i=1;i<Words.length;i++) {
-    textbuffer.append(' ');
-    textbuffer.append(Words[i]);
-  }
-  text=textbuffer.toString();
+//  textbuffer.append(Words[0]);
+//  for (int i=1;i<Words.length;i++) {
+//    textbuffer.append(' ');
+//    textbuffer.append(Words[i]);
+//  }
+//  text=textbuffer.toString();
+
+  String text = Text.replaceAll("\n"," ");
 
   OutputImage.textFont(Font);
 
@@ -639,13 +628,6 @@ color pixelAverageAt(int x, int y, int radius)
     }
   }
   return color(resultR/count, resultG/count, resultB/count);
-}
-
-/*
- * This function should be used instead of TextLabel.setValue which will throw an exception when passed a non-ascii string
- */
-void setTextLabelValue(GLabel label, String text) {
-  label.setText(text.replaceAll("[^\\p{ASCII}]", " "));
 }
 
 
