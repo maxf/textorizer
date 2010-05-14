@@ -15,7 +15,8 @@ GWindow canvas;
 GWinApplet canvasApplet;
 
 // ====== Controls ======
-int LeftMargin = 5;
+int LeftColumnOffset = 5;
+int RightColumnOffset = 305;
 String[] fontList = PFont.list();
 
 // common controls
@@ -25,6 +26,8 @@ GButton changeImageButton, svgSaveButton, pngSaveButton, textFileButton;
 GCombo fontSelector;
 GTextField textArea;
 GButton textLoadButton, textSaveButton, textSaveAsButton;
+GOptionGroup modes;
+GOption optionT1, optionT2;
 
 // textorizer1 controls
 GPanel t1Panel;
@@ -56,7 +59,6 @@ String Text;
 String FontName="FFScala";
 String TextFileName = "textorizer.txt";
 PFont Font;
-String[] Words;
 int NStrokes = 1000;
 float Threshold=100;
 float minFontScale=5;
@@ -158,7 +160,7 @@ void setup() {
   int ypos = 10;
 
   // Size has to be the very first statement, or setup() will be run twice
-  size(300,700);
+  size(600,400);
 
 //  background(0);
 //  stroke(1);
@@ -174,7 +176,8 @@ void setup() {
   loadWords(false);
 
   //  G4P.setFont(this, "Serif", 14);
-  G4P.setColorScheme(this, GCScheme.GREEN_SCHEME);
+  G4P.setColorScheme(this, GCScheme.GREY_SCHEME);
+  G4P.messagesEnabled(false);
   canvas = new GWindow(this,"Textorizer",800,500,FrameWidth,FrameHeight,false,P2D);
   canvas.addData(canvasData);
   canvas.addDrawHandler(this,"canvasDrawHandler");
@@ -188,70 +191,77 @@ void setup() {
 
 
   // common controls
-  imageNameLabel  = new GLabel(this,LabelInputImageFileName,LeftMargin,ypos,100);
+  imageNameLabel  = new GLabel(this,LabelInputImageFileName,LeftColumnOffset,ypos,100);
   changeImageButton  = new GButton(this,InputImageFileName,83,ypos,200,12);
 
   ypos+=35;
-  outputWidthSlider = new TSlider(this,LabelOutputWidth,LeftMargin,ypos,OutputImageWidth,500,5000);
+  outputWidthSlider = new TSlider(this,LabelOutputWidth,LeftColumnOffset,ypos,OutputImageWidth,500,5000);
 
   ypos+=45; 
-  bgOpacitySlider = new TSlider(this,LabelBackgroundOpacity,LeftMargin,ypos,OutputBackgroundOpacity,0,255);
+  bgOpacitySlider = new TSlider(this,LabelBackgroundOpacity,LeftColumnOffset,ypos,OutputBackgroundOpacity,0,255);
 
   ypos+=40;
-  int savedypos = ypos; // saved value because we're adding font combo later
-
+  textLabel = new GLabel(this,LabelText,LeftColumnOffset,ypos,50);
+  textFileButton = new GButton(this,TextFileName,LeftColumnOffset+50,ypos,230,12);
   ypos+=25;
-  textLabel = new GLabel(this,LabelText,LeftMargin,ypos,50);
-  textFileButton = new GButton(this,TextFileName,LeftMargin+50,ypos,230,12);
-  ypos+=25;
-  textArea = new GTextField(this, Text, LeftMargin+50, ypos, 230, 100, true); 
+  textArea = new GTextField(this, Text, LeftColumnOffset+50, ypos, 230, 100, true); 
   textArea.setText(Text);
-  textSaveButton = new GButton(this,"Save",LeftMargin,ypos,35,12);
-  textSaveAsButton = new GButton(this,"Save as",LeftMargin,ypos+20,35,12);
+  textSaveButton = new GButton(this,"Save",LeftColumnOffset,ypos,35,12);
+  textSaveAsButton = new GButton(this,"Save as",LeftColumnOffset,ypos+20,35,12);
 
-  ypos+=120;
+  ypos+=115;
+  int savedypos = ypos; // saved value because we're adding font combo later
+ 
 
-  t1goButton = new GButton(this,LabelT1Go,LeftMargin,ypos,80,20);
-  t2goButton=new GButton(this,LabelT2Go,LeftMargin+90,ypos,80,20); 
+  ypos=10;
 
-  ypos+=30;
-  svgSaveButton = new GButton(this,LabelSaveSVG,LeftMargin,ypos,80,12); 
-  pngSaveButton = new GButton(this,LabelSavePNG,LeftMargin+90,ypos,80,12); 
+  modes = new GOptionGroup();
+  optionT1 = new GOption(this,"Textorizer 1",RightColumnOffset,ypos,100);
+  modes.addOption(optionT1);
+  optionT2 = new GOption(this,"Textorizer 2",RightColumnOffset+100,ypos,100);
+  modes.addOption(optionT2);
 
-  ypos+=80;
+  ypos+=90;
   // Textorizer 2 controls
-  t2Panel = new GPanel(this,"Textorizer 2 Controls (click to show / hide)",LeftMargin,ypos,290,250);
+  t2Panel = new GPanel(this,"Textorizer 2 Controls (click to show or hide)",RightColumnOffset,ypos,290,250);
   int pypos = 20;
-  t2textSize = new TSlider(this,LabelT2TextSize,LeftMargin,pypos,T2FontSize,4.0,50.0,t2Panel);
+  t2textSize = new TSlider(this,LabelT2TextSize,5,pypos,T2FontSize,4.0,50.0,t2Panel);
   
   pypos+=45;
-  t2lineHeight = new TSlider(this,LabelT2LineHeight,LeftMargin,pypos,T2LineHeight,0.5,3.0,t2Panel);
+  t2lineHeight = new TSlider(this,LabelT2LineHeight,5,pypos,T2LineHeight,0.5,3.0,t2Panel);
 
   pypos+=45;
-  t2colorAdjustment = new TSlider(this,LabelT2ColourSaturation,LeftMargin,pypos,T2ColourAdjustment,0.0,255.0,t2Panel);
+  t2colorAdjustment = new TSlider(this,LabelT2ColourSaturation,5,pypos,T2ColourAdjustment,0.0,255.0,t2Panel);
 
   pypos+=45;
-  t2kerningSlider = new TSlider(this,LabelT2Kerning,LeftMargin,pypos,T2Kerning,-.5,.5,t2Panel);
+  t2kerningSlider = new TSlider(this,LabelT2Kerning,5,pypos,T2Kerning,-.5,.5,t2Panel);
 
   pypos+=45;
-  t2fontScaleFactorSlider = new TSlider(this,LabelT2FontScale,LeftMargin,pypos,T2FontScaleFactor,0.0,5.0,t2Panel);
+  t2fontScaleFactorSlider = new TSlider(this,LabelT2FontScale,5,pypos,T2FontScaleFactor,0.0,5.0,t2Panel);
 
   ypos-=30;
   // Textorizer 1 controls
-  t1Panel = new GPanel(this,"Textorizer 1 Controls (click to show or hide)",LeftMargin,ypos,290,200);
+  t1Panel = new GPanel(this,"Textorizer 1 Controls (click to show or hide)",RightColumnOffset,ypos,290,200);
   t1Panel.setOpaque(true);
   pypos=20;
   t1numSlider = new TSlider(this,LabelT1NbStrokes,2,pypos,1000,100,10000,t1Panel);
   pypos+=45;
-  t1thresholdSlider = new TSlider(this,LabelT1Threshold,LeftMargin,pypos,150f,0f,200f,t1Panel);
+  t1thresholdSlider = new TSlider(this,LabelT1Threshold,5,pypos,150f,0f,200f,t1Panel);
   pypos+=45;
-  t1FontScaleMin = new TSlider(this,LabelT1FontMin,LeftMargin,pypos,minFontScale,0f,50f,t1Panel);
+  t1FontScaleMin = new TSlider(this,LabelT1FontMin,5,pypos,minFontScale,0f,50f,t1Panel);
   pypos+=45;
-  t1FontScaleMax = new TSlider(this,LabelT1FontMax,LeftMargin,pypos,maxFontScale,0f,50f,t1Panel);
+  t1FontScaleMax = new TSlider(this,LabelT1FontMax,5,pypos,maxFontScale,0f,50f,t1Panel);
+
+  ypos+=300;
+  t1goButton = new GButton(this,LabelT1Go,RightColumnOffset,ypos,80,20);
+  t2goButton=new GButton(this,LabelT2Go,RightColumnOffset+90,ypos,80,20); 
+  ypos+=30;
+  svgSaveButton = new GButton(this,LabelSaveSVG,RightColumnOffset,ypos,80,12); 
+  pngSaveButton = new GButton(this,LabelSavePNG,RightColumnOffset+90,ypos,80,12);
 
   // we have to put this at the bottom otherwise it shows behind the rest
-  fontLabel = new GLabel(this,LabelFont,LeftMargin,savedypos,50); 
-  fontSelector = new GCombo(this,fontList,fontList.length,LeftMargin+50,savedypos,230);
+  fontLabel = new GLabel(this,LabelFont,LeftColumnOffset,savedypos,50); 
+  fontSelector = new GCombo(this,fontList,7,LeftColumnOffset+50,savedypos,230);
 }
 
 void go() 
@@ -277,7 +287,7 @@ void go()
 
 void draw()
 {
-  background(0,192,0);
+  background(210);
 }
 
 
@@ -356,9 +366,9 @@ void textorize() {
   float dx,dy,dmag2,vnear,b,textScale,dir,r;
   color v,p;
   String word;
-    
-  fill(128);
-  //  Words=loadStrings(T1WordsFileName);
+  String[] Words;
+
+  Words=Text.split("\n");
   OutputImage.textFont(Font);
 
   for (int h=0; h<NStrokes;h++) {
@@ -497,10 +507,6 @@ void handleSliderEvents(GSlider slider) {
   }  
 }
 
-public void handleOptionEvents(GOption selected, GOption deselected){
-  ;
-};
-
 void handleComboEvents(GCombo combo){
   if (combo == fontSelector) {
     // Get font name and size from
@@ -510,6 +516,15 @@ void handleComboEvents(GCombo combo){
   }
 }	
 
+void handlePanelEvents(GPanel panel) {
+  if (panel == t1Panel) {
+    println(1);
+    t2Panel.setCollapsed(!t1Panel.isCollapsed());
+  } else if (panel == t2Panel) {
+    println(2);
+    t1Panel.setCollapsed(!t2Panel.isCollapsed());
+  }
+}   
 
 String selectInputFile(String defaultName)
 {
