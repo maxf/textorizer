@@ -12,26 +12,29 @@ import java.io.*;
 import javax.swing.*;
 
 GWindow canvas;
+GWinApplet canvasApplet;
 
 // ====== Controls ======
-int SliderWidth = 150;
+int LeftMargin = 5;
 String[] fontList = PFont.list();
 
 // common controls
-GHorzSlider bgOpacitySlider, outputWidthSlider;
-GLabel imageNameLabel, svgFileLabel, outputImgFileLabel, currentFontLabel, aboutLabel;
-GButton changeImageButton, outputImageChangeButton, svgChangeButton;
+TSlider outputWidthSlider, bgOpacitySlider;
+GLabel imageNameLabel, fontLabel, textLabel, statusLabel;
+GButton changeImageButton, svgSaveButton, pngSaveButton;
 GCombo fontSelector;
+GTextField textArea;
+GButton textLoadButton, textSaveButton;
 
 // textorizer1 controls
-GLabel textorizer1label, t1wordsFileName;
-GHorzSlider t1numSlider, t1thresholdSlider, t1FontScaleMin, t1FontScaleMax;
-GButton t1goButton, t1changeWordsButton;
+GPanel t1Panel;
+TSlider t1numSlider, t1thresholdSlider, t1FontScaleMin, t1FontScaleMax;
+GButton t1goButton;
 
 // textorizer2 controls
-GLabel textorizer2label, t2textFileName, t2textFileLabel; 
-GHorzSlider t2lineHeight, t2textSize, t2colorAdjustment, t2kerningSlider, t2fontScaleFactorSlider;
-GButton t2goButton, t2changeTextButton;
+GPanel t2Panel;
+TSlider t2lineHeight, t2textSize, t2colorAdjustment, t2kerningSlider, t2fontScaleFactorSlider;
+GButton t2goButton;
 
 
 
@@ -47,8 +50,9 @@ CanvasWinData canvasData = new CanvasWinData();
 PGraphics OutputImage = canvasData.img;
 int OutputImageWidth = FrameWidth, OutputImageHeight = FrameHeight;
 int OutputBackgroundOpacity=30;
-String OutputImageFileName="textorizer.png";
+String PngFileName="textorizer.png";
 
+String Text = "hello, this is textorizer";
 String FontName="FFScala";
 String T1WordsFileName="textorizer.txt";
 String T2TextFileName="textorizer2.txt";
@@ -88,18 +92,19 @@ String[] SvgOutput;
 // Labels
 String LabelChange = "change";
 String LabelInputImageFileName = "Input image: ";
-String LabelOutputWidth = "OUTPUT IMAGE SIZE";
-String LabelBackgroundOpacity = "BACKGROUND OPACITY";
-String LabelSVGOutputFileName = "SVG output file: ";
-String LabelOutputImageFileName = "Output image: ";
+String LabelOutputWidth = "Output size: ";
+String LabelBackgroundOpacity = "Background: ";
+//String LabelSVGOutputFileName = "SVG output file: ";
+String LabelSaveSVG = "Save as SVG";
+//String LabelOutputImageFileName = "Output image: ";
+String LabelSavePNG = "Save as PNG";
 String LabelFont = "Font: ";
-String LabelSelectFont = "Select Font";
-String LabelT1SeparatorIdle =  "---------------------- Textorizer 1 --------------------";
-String LabelT2SeparatorIdle =  "---------------------- Textorizer 2 --------------------";
-String LabelT1SeparatorRunning="----------------------- RENDERING --------------- ";
-String LabelT2SeparatorRunning="----------------------- RENDERING --------------- ";
+String LabelText = "Text: ";
+String LabelT1FontMin = "Min Font Size";
+String LabelT1FontMax = "Max Font Size";
+
 String LabelT1WordsFile = "Words file (TXT format): ";
-String LabelT1NbStrokes = "Number of Strokes";
+String LabelT1NbStrokes = "Strokes";
 String LabelT1Threshold = "Threshold";
 String LabelT1FontRange = "Font Range";
 String LabelT1Go = "Textorize!";
@@ -125,7 +130,7 @@ void loadWords(int mode) {
     if (newWords != null) {
       T1WordsFileName = newWordsFileName;
       Words = newWords;
-      setTextLabelValue(t1wordsFileName, LabelT1WordsFile+T1WordsFileName);
+      //      setTextLabelValue(t1wordsFileName, LabelT1WordsFile+T1WordsFileName);
     }
     break;
   case 2: // textorizer 2
@@ -134,7 +139,7 @@ void loadWords(int mode) {
     if (newWords != null) {
       T2TextFileName = newWordsFileName;
       Words = newWords;
-      setTextLabelValue(t2textFileName, LabelT2TextFile+T2TextFileName);
+      //      setTextLabelValue(t2textFileName, LabelT2TextFile+T2TextFileName);
     }
     break;
   }
@@ -156,7 +161,7 @@ void setup() {
   int ypos = 10;
 
   // Size has to be the very first statement, or setup() will be run twice
-  size(300,515);
+  size(300,700);
 
 //  frame.setResizable(true);  // call draw() when the window is resized
 //  frame.addComponentListener(new ComponentAdapter() { 
@@ -182,104 +187,74 @@ void setup() {
 
   //  G4P.setFont(this, "Serif", 14);
   G4P.setColorScheme(this, GCScheme.GREEN_SCHEME);
-  canvas = new GWindow(this,"Textorizer",500,0,FrameWidth,FrameHeight,false,P2D);
+  canvas = new GWindow(this,"Textorizer",800,500,FrameWidth,FrameHeight,false,P2D);
   canvas.addData(canvasData);
-  canvas.addDrawHandler(this,"canvasDraw");
+  canvas.addDrawHandler(this,"canvasDrawHandler");
   //  controlWindow.setUpdateMode(ControlWindow.NORMAL);
   //  controlWindow.addDrawHandler(this,"controlWindowDraw");
 
   // common controls
-  imageNameLabel  = new GLabel(this,LabelInputImageFileName,10,ypos,100);
+  imageNameLabel  = new GLabel(this,LabelInputImageFileName,LeftMargin,ypos,100);
   changeImageButton  = new GButton(this,InputImageFileName,83,ypos,200,12);
-  changeImageButton.setTextAlign(GAlign.LEFT);
 
-  ypos+=20; 
-  outputWidthSlider = new GHorzSlider(this,10,ypos,SliderWidth,15);
-  outputWidthSlider.setLimits((float)OutputImageWidth,100.0,5000.0);
+  ypos+=35;
+  outputWidthSlider = new TSlider(this,LabelOutputWidth,LeftMargin,ypos,OutputImageWidth,500,5000);
 
-  ypos+=20; 
-  bgOpacitySlider = new GHorzSlider(this,10,ypos,SliderWidth,15);
-  bgOpacitySlider.setLimits((float)OutputBackgroundOpacity,0.0,255.0);
+  ypos+=45; 
+  bgOpacitySlider = new TSlider(this,LabelBackgroundOpacity,LeftMargin,ypos,OutputBackgroundOpacity,0,255);
 
-  ypos+=25; 
-  svgFileLabel = new GLabel(this,LabelSVGOutputFileName+SvgFileName,50,ypos,50);
-  svgChangeButton = new GButton(this,LabelChange,10,ypos-3,37,12); 
+  ypos+=40;
+  int savedypos = ypos; // saved value because we're adding font combo later
 
-  ypos+=20; 
-  outputImgFileLabel = new GLabel(this,LabelOutputImageFileName+OutputImageFileName,50, ypos, 50); 
-  outputImageChangeButton = new GButton(this,LabelChange,10,ypos-3,37,12);
+  ypos+=25;
+  textLabel = new GLabel(this,LabelText,LeftMargin,ypos,50);
+  textArea = new GTextField(this, Text, LeftMargin+40, ypos, 230, 100, true); 
+  textLoadButton = new GButton(this,"Load",LeftMargin,ypos+20,35,12);
+  textSaveButton = new GButton(this,"Save",LeftMargin,ypos+40,35,12);
 
-  ypos+=20;
-  currentFontLabel = new GLabel(this,LabelFont+FontName,10,ypos,50); 
+  ypos+=120;
 
-  ypos+=20; 
-  fontSelector = new GCombo(this,fontList,fontList.length,10,ypos,200);
+  t1goButton = new GButton(this,LabelT1Go,LeftMargin,ypos,80,20);
+  t2goButton=new GButton(this,LabelT2Go,LeftMargin+90,ypos,80,20); 
 
+  ypos+=30;
+  svgSaveButton = new GButton(this,LabelSaveSVG,LeftMargin,ypos,80,12); 
+  pngSaveButton = new GButton(this,LabelSavePNG,LeftMargin+90,ypos,80,12); 
 
-  // Textorizer 1 controls
-  ypos+=110;
-  textorizer1label = new GLabel(this,LabelT1SeparatorIdle, 10,ypos,50);
-
-  ypos+=20;
-  t1numSlider = new GHorzSlider(this,10,ypos,SliderWidth,15);
-  t1numSlider.setLimits(1000.0,100.0,10000.0);
-
-  ypos+=20; 
-  t1thresholdSlider = new GHorzSlider(this,10,ypos,SliderWidth,15);
-  t1thresholdSlider.setLimits((float)SliderWidth,0.0,200.0);
-
-  ypos+=20;
-  t1FontScaleMin = new GHorzSlider(this,10,ypos,SliderWidth,15);
-  t1FontScaleMin.setLimits(minFontScale,0.0,50.0);
-  
-
-  ypos+=20;
-  t1FontScaleMax = new GHorzSlider(this,10,ypos,SliderWidth,15);
-  t1thresholdSlider.setLimits(maxFontScale,0.0,50.0);
-
-  ypos+=20; 
-  t1changeWordsButton = new GButton(this,LabelChange,10,ypos-3,37,12); 
-
-  t1wordsFileName = new GLabel(this,((T1WordsFileName==null)?"":LabelT1WordsFile+T1WordsFileName),50,ypos, 50);
-
-  ypos+=15;
-  t1goButton = new GButton(this, LabelT1Go, 240,300, 50,20);
-
-
+  ypos+=80;
   // Textorizer 2 controls
-  ypos+=10;
-  textorizer2label = new GLabel(this, LabelT2SeparatorIdle, 10,ypos,100);
-
-  ypos+=20;
-  t2textSize = new GHorzSlider(this,10,ypos,SliderWidth,15);
-  t2textSize.setLimits(T2FontSize,4.0,50.0);
+  t2Panel = new GPanel(this,"Textorizer 2 Controls (click to show / hide)",LeftMargin,ypos,290,250);
+  int pypos = 20;
+  t2textSize = new TSlider(this,LabelT2TextSize,LeftMargin,pypos,T2FontSize,4.0,50.0,t2Panel);
   
-  ypos+=20;
-  t2lineHeight = new GHorzSlider(this,10,ypos,SliderWidth,15);
-  t2lineHeight.setLimits(T2LineHeight,0.5,3.0);
+  pypos+=45;
+  t2lineHeight = new TSlider(this,LabelT2LineHeight,LeftMargin,pypos,T2LineHeight,0.5,3.0,t2Panel);
 
-  ypos+=20;
-  t2colorAdjustment = new GHorzSlider(this,10,ypos,SliderWidth,15);
-  t2colorAdjustment.setLimits(T2ColourAdjustment,0.0,255.0);
+  pypos+=45;
+  t2colorAdjustment = new TSlider(this,LabelT2ColourSaturation,LeftMargin,pypos,T2ColourAdjustment,0.0,255.0,t2Panel);
 
-  ypos+=20;
-  t2kerningSlider = new GHorzSlider(this,10,ypos, SliderWidth,15);
-  t2kerningSlider.setLimits(T2Kerning,-.5,.5);
+  pypos+=45;
+  t2kerningSlider = new TSlider(this,LabelT2Kerning,LeftMargin,pypos,T2Kerning,-.5,.5,t2Panel);
 
-  ypos+=20;
-  t2fontScaleFactorSlider = new GHorzSlider(this,10,ypos, SliderWidth,15);
-  t2fontScaleFactorSlider.setLimits(T2FontScaleFactor,0.0,5.0);
+  pypos+=45;
+  t2fontScaleFactorSlider = new TSlider(this,LabelT2FontScale,LeftMargin,pypos,T2FontScaleFactor,0.0,5.0,t2Panel);
 
-  ypos+=27; 
-  t2changeTextButton = new GButton(this,LabelChange,10,ypos-3, 37, 12); 
-  t2textFileName = new GLabel(this,((T2TextFileName==null)?"":LabelT2TextFile+T2TextFileName), 50,ypos, 50);
+  ypos-=30;
+  // Textorizer 1 controls
+  t1Panel = new GPanel(this,"Textorizer 1 Controls (click to show or hide)",LeftMargin,ypos,290,200);
+  t1Panel.setOpaque(true);
+  pypos=20;
+  t1numSlider = new TSlider(this,LabelT1NbStrokes,2,pypos,1000,100,10000,t1Panel);
+  pypos+=45;
+  t1thresholdSlider = new TSlider(this,LabelT1Threshold,LeftMargin,pypos,150f,0f,200f,t1Panel);
+  pypos+=45;
+  t1FontScaleMin = new TSlider(this,LabelT1FontMin,LeftMargin,pypos,minFontScale,0f,50f,t1Panel);
+  pypos+=45;
+  t1FontScaleMax = new TSlider(this,LabelT1FontMax,LeftMargin,pypos,maxFontScale,0f,50f,t1Panel);
 
-  t2goButton=new GButton(this,LabelT2Go,235,440, 55,20); 
-
-  // info label
-  ypos+=25; 
-  aboutLabel = new GLabel(this,LabelInfo, 0,ypos,100);
-
+  // we have to put this at the bottom otherwise it shows behind the rest
+  fontLabel = new GLabel(this,LabelFont,LeftMargin,savedypos,50); 
+  fontSelector = new GCombo(this,fontList,fontList.length,LeftMargin+40,savedypos,230);
 }
 
 void go() 
@@ -292,13 +267,14 @@ void go()
     setupSvg();
     setupFont();
     setupBgPicture();
-    
+
     switch(TextorizerMode) {
       case 1: textorize(); break;
       case 2: textorize2(); break;
     }
+
     OutputImage.endDraw();
-    OutputImage.save(OutputImageFileName);
+    OutputImage.save(PngFileName);
   }
 }
 
@@ -307,45 +283,54 @@ void draw()
   background(0,192,0);
 }
 
-void canvasDraw(GWinApplet appc, GWinData data)
-{
-  appc.imageMode(CENTER);
-  appc.noLoop();
-  appc.background(255);
-  appc.cursor(WAIT);
-  cursor(WAIT);
 
+void canvasDrawHandler(GWinApplet appc, GWinData data)
+{
+  canvasApplet = appc;
+  canvasDraw();
+}
+
+void canvasDraw()
+{
+  canvasApplet.noLoop();
+  canvasApplet.background(255);
+  canvasApplet.cursor(WAIT);
+  cursor(WAIT);
   if (NeedsRerendering) {
     go();
     NeedsRerendering=false;
   }
-
   // fit the image best in the window
   int fittingWidth, fittingHeight;
+  int windowW = canvas.getWidth(), windowH = canvas.getHeight();
 
-  if (width >= OutputImageWidth && height >= OutputImageHeight) {
+  if (windowW >= OutputImageWidth && windowH >= OutputImageHeight) {
     fittingWidth = OutputImageWidth;
     fittingHeight = OutputImageHeight;
   } else {
-    if (float(width)/height > (float)OutputImageWidth/OutputImageHeight) {
-      fittingHeight = height;
+    if (float(windowW)/windowH > (float)OutputImageWidth/OutputImageHeight) {
+      fittingHeight = windowH;
       fittingWidth = fittingHeight*OutputImageWidth/OutputImageHeight;
     } else {
-      fittingWidth = width;
+      fittingWidth = windowW;
       fittingHeight = fittingWidth*OutputImageHeight/OutputImageWidth;
     }
   }
 
-  appc.image(OutputImage, FrameWidth/2, FrameHeight/2, fittingWidth, fittingHeight);
-
-  appc.cursor(ARROW);
+  println(fittingWidth+","+fittingHeight);
+  println(windowW/2+","+windowH/2);
+  //  canvasApplet.imageMode(CENTER); doesn't seem to work
+  //  canvasApplet.image(OutputImage, windowW/2+100, windowH/2+100, fittingWidth, fittingHeight);
+  canvasApplet.image(OutputImage, 0, 0, fittingWidth, fittingHeight);
+  canvasApplet.cursor(ARROW);
   cursor(ARROW);
+  canvasApplet.redraw();
 }
 
 void setupSvg() {
   SvgBuffer = new StringBuffer(4096);
   SvgBuffer.append("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n");
-  SvgBuffer.append("<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 "+width+" "+height+"'>\n");
+  SvgBuffer.append("<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 "+OutputImageWidth+" "+OutputImageWidth+"'>\n");
 }
 
 void setupFont() {
@@ -383,7 +368,7 @@ void textorize() {
 
   for (int h=0; h<NStrokes;h++) {
     progress = 1+int(100.0*h/NStrokes);
-    setTextLabelValue(textorizer1label, LabelT1SeparatorRunning + progress + "%");
+    //    setTextLabelValue(textorizer1label, LabelT1SeparatorRunning + progress + "%");
 
     x=int(random(2,InputImage.width-3));
     y=int(random(2,InputImage.height-3));
@@ -447,29 +432,30 @@ void textorize() {
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+void handleTextFieldEvents(GTextField textfield) 
+{ 
+  Text = textfield.getText();
+}
+
 void handleButtonEvents(GButton button) {
 
   if(button == changeImageButton) {
     InputImage = loadInputImage(InputImageFileName);
-  } else if(button == svgChangeButton) { // 8
+  } else if(button == svgSaveButton) {
     SvgFileName = selectOutputFile(SvgFileName);
-    setTextLabelValue(svgFileLabel,"SVG Output File: "+SvgFileName);
-  } else if(button == outputImageChangeButton) { //9
-    String s;
-    OutputImageFileName = selectOutputFile(OutputImageFileName);
-    setTextLabelValue(outputImgFileLabel, OutputImageFileName);
-  } else if(button == t1goButton) { // 10
+    canvasDraw();
+  } else if(button == pngSaveButton) {
+    PngFileName = selectOutputFile(PngFileName);
+    NeedsRerendering=true;
+    canvasDraw();
+  } else if(button == t1goButton) {
     TextorizerMode=1;
     NeedsRerendering=true;
-    redraw();
-  } else if(button == t1changeWordsButton) { // 11
-    loadWords(1);
-  } else if(button == t2goButton) { // 103
+    canvasDraw();
+  } else if(button == t2goButton) {
     TextorizerMode=2;
     NeedsRerendering=true;
-    redraw();
-  } else if(button == t2changeTextButton) { //104
-    loadWords(2);
+    canvasDraw();
   }
 }
 
@@ -478,9 +464,9 @@ void handleSliderEvents(GSlider slider) {
     NStrokes = slider.getValue();
   } else if (slider == t1thresholdSlider) { // 2
     Threshold = slider.getValuef();
-  } else if (slider == bgOpacitySlider) { // 3
+  } else if (slider == bgOpacitySlider) {
     OutputBackgroundOpacity = slider.getValue();
-  } else if (slider == outputWidthSlider) { // 5
+  } else if (slider == outputWidthSlider) {
     OutputImageWidth = slider.getValue();
     OutputImageHeight = OutputImageWidth * InputImage.height / InputImage.width;
   } else if (slider == t1FontScaleMin) { // 4
@@ -566,8 +552,7 @@ void textorize2()
 
   for (y=0; y < OutputImageHeight; y+=T2FontSize*T2LineHeight) {
     progress = 1+int(100*y/OutputImageHeight);
-    //    setTextLabelValue(textorizer2label, LabelT2SeparatorRunning + progress + "%");
-
+    //    statusLabel.setText("Running - "+progress+"%");
     x=0;
 
     // skip any white space at the beginning of the line
@@ -666,4 +651,38 @@ void setTextLabelValue(GLabel label, String text) {
 
 class CanvasWinData extends GWinData {
   public PGraphics img;
+}
+
+class TSlider extends GWSlider {
+  GLabel l;
+  static final int SliderWidth = 190, SliderOffset = 80;
+  
+  public TSlider(PApplet theApplet, String label, int x, int y, int init, int min, int max) {
+    super(theApplet,x+SliderOffset,y,SliderWidth);
+    this.setValueType(GWSlider.INTEGER);
+    this.setLimits(init,min,max);
+    l = new GLabel(theApplet, label, x, y, SliderOffset);
+  }
+  public TSlider(PApplet theApplet, String label, int x, int y, float init, float min, float max) {
+    super(theApplet,x+SliderOffset,y,SliderWidth);
+    this.setValueType(GWSlider.DECIMAL);
+    this.setLimits(init,min,max);
+    l = new GLabel(theApplet, label, x, y, SliderOffset);
+  }
+  public TSlider(PApplet theApplet, String label, int x, int y, int init, int min, int max, GPanel panel) {
+    super(theApplet,x+SliderOffset,y,SliderWidth);
+    this.setValueType(GWSlider.INTEGER);
+    this.setLimits(init,min,max);
+    l = new GLabel(theApplet, label, x, y, SliderOffset);
+    panel.add(this);
+    panel.add(l);
+  }
+  public TSlider(PApplet theApplet, String label, int x, int y, float init, float min, float max, GPanel panel) {
+    super(theApplet,x+SliderOffset,y,SliderWidth);
+    this.setValueType(GWSlider.DECIMAL);
+    this.setLimits(init,min,max);
+    l = new GLabel(theApplet, label, x, y, SliderOffset);
+    panel.add(this);
+    panel.add(l);
+  }
 }
