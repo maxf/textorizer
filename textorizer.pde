@@ -184,7 +184,11 @@ void setup() {
   canvas.addComponentListener(new ComponentAdapter() { 
     public void componentResized(ComponentEvent e) { 
       if(e.getSource()==canvas) { 
-        canvasApplet.redraw();
+        try {
+          canvasApplet.redraw();
+        } catch(Exception ex) {
+          println(ex);
+        }
       } 
     } 
   });
@@ -221,9 +225,11 @@ void setup() {
   optionT2 = new GOption(this,"Textorizer 2",RightColumnOffset+100,ypos,100);
   modes.addOption(optionT2);
 
-  ypos+=90;
+  ypos+=40;
   // Textorizer 2 controls
-  t2Panel = new GPanel(this,"Textorizer 2 Controls (click to show or hide)",RightColumnOffset,ypos,290,250);
+  t2Panel = new GPanel(this,"Textorizer 2 Controls",RightColumnOffset,ypos,290,300);
+  t2Panel.setVisible(false);
+  t2Panel.setCollapsed(false);
   int pypos = 20;
   t2textSize = new TSlider(this,LabelT2TextSize,5,pypos,T2FontSize,4.0,50.0,t2Panel);
   
@@ -238,11 +244,15 @@ void setup() {
 
   pypos+=45;
   t2fontScaleFactorSlider = new TSlider(this,LabelT2FontScale,5,pypos,T2FontScaleFactor,0.0,5.0,t2Panel);
+  pypos+=55;
+  t2goButton=new GButton(this,LabelT2Go,5,pypos,80,20); 
+  t2Panel.add(t2goButton);
 
-  ypos-=30;
+  //  ypos-=90;
   // Textorizer 1 controls
-  t1Panel = new GPanel(this,"Textorizer 1 Controls (click to show or hide)",RightColumnOffset,ypos,290,200);
-  t1Panel.setOpaque(true);
+  t1Panel = new GPanel(this,"Textorizer 1 Controls",RightColumnOffset,ypos,290,250);
+  t1Panel.setVisible(false);
+  t1Panel.setCollapsed(false);
   pypos=20;
   t1numSlider = new TSlider(this,LabelT1NbStrokes,2,pypos,1000,100,10000,t1Panel);
   pypos+=45;
@@ -251,11 +261,11 @@ void setup() {
   t1FontScaleMin = new TSlider(this,LabelT1FontMin,5,pypos,minFontScale,0f,50f,t1Panel);
   pypos+=45;
   t1FontScaleMax = new TSlider(this,LabelT1FontMax,5,pypos,maxFontScale,0f,50f,t1Panel);
+  pypos+=55;
+  t1goButton = new GButton(this,LabelT1Go,5,pypos,80,20);
+  t1Panel.add(t1goButton);
 
-  ypos+=300;
-  t1goButton = new GButton(this,LabelT1Go,RightColumnOffset,ypos,80,20);
-  t2goButton=new GButton(this,LabelT2Go,RightColumnOffset+90,ypos,80,20); 
-  ypos+=30;
+  ypos+=330;
   svgSaveButton = new GButton(this,LabelSaveSVG,RightColumnOffset,ypos,80,12); 
   pngSaveButton = new GButton(this,LabelSavePNG,RightColumnOffset+90,ypos,80,12);
 
@@ -302,6 +312,7 @@ void canvasDraw()
   canvasApplet.noLoop();
   canvasApplet.background(255);
   canvasApplet.cursor(WAIT);
+  canvasApplet.smooth();
   cursor(WAIT);
   if (NeedsRerendering) {
     go();
@@ -516,15 +527,16 @@ void handleComboEvents(GCombo combo){
   }
 }	
 
-void handlePanelEvents(GPanel panel) {
-  if (panel == t1Panel) {
-    println(1);
-    t2Panel.setCollapsed(!t1Panel.isCollapsed());
-  } else if (panel == t2Panel) {
-    println(2);
-    t1Panel.setCollapsed(!t2Panel.isCollapsed());
+public void handleOptionEvents(GOption selected, GOption deselected){
+  if (selected == optionT1) {
+    t2Panel.setVisible(false);
+    t1Panel.setVisible(true);
+  } else if (selected == optionT2) {
+    t1Panel.setVisible(false);
+    t2Panel.setVisible(true);
   }
-}   
+}
+
 
 String selectInputFile(String defaultName)
 {
