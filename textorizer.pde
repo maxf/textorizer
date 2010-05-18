@@ -265,7 +265,7 @@ void setup() {
   t1goButton = new GButton(this,LabelT1Go,5,pypos,80,20);
   t1Panel.add(t1goButton);
 
-  ypos+=330;
+  ypos+=320;
   svgSaveButton = new GButton(this,LabelSaveSVG,RightColumnOffset,ypos,80,12); 
   pngSaveButton = new GButton(this,LabelSavePNG,RightColumnOffset+90,ypos,80,12);
 
@@ -320,7 +320,9 @@ void canvasDraw()
   }
   // fit the image best in the window
   int fittingWidth, fittingHeight;
-  int windowW = canvas.getWidth(), windowH = canvas.getHeight();
+  Insets insets = canvas.getInsets();
+  int windowW = canvas.getWidth() - insets.left - insets.right;
+  int windowH = canvas.getHeight() - insets.top - insets.bottom;
 
   if (windowW >= OutputImageWidth && windowH >= OutputImageHeight) {
     fittingWidth = OutputImageWidth;
@@ -335,9 +337,7 @@ void canvasDraw()
     }
   }
 
-  //  canvasApplet.imageMode(CENTER); doesn't seem to work
-  //  canvasApplet.image(OutputImage, windowW/2+100, windowH/2+100, fittingWidth, fittingHeight);
-  canvasApplet.image(OutputImage, 0, 0, fittingWidth, fittingHeight);
+  canvasApplet.image(OutputImage, (windowW-fittingWidth)/2, (windowH-fittingHeight)/2, fittingWidth, fittingHeight);
   canvasApplet.cursor(ARROW);
   cursor(ARROW);
   canvasApplet.redraw();
