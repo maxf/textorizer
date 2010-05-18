@@ -1,6 +1,6 @@
-/* textorizer12: vectorises a picture into an SVG using text strings
+/* textorizer: draws a picture using text
  * see: http://lapin-bleu.net/software/textorizer
- * Copyright Max Froumentin 2009
+ * Copyright Max Froumentin 2010
  * This software is distributed under the
  * W3C(R) SOFTWARE NOTICE AND LICENSE:
  * http://www.w3.org/Consortium/Legal/2002/copyright-software-20021231
@@ -10,6 +10,8 @@ import guicomponents.*;
 import java.util.List;
 import java.io.*;
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 
 GWindow canvas;
 GWinApplet canvasApplet;
@@ -21,8 +23,8 @@ String[] fontList = PFont.list();
 
 // common controls
 TSlider outputWidthSlider, bgOpacitySlider;
-GLabel imageNameLabel, fontLabel, textLabel, statusLabel;
-GButton changeImageButton, svgSaveButton, pngSaveButton, textFileButton;
+GLabel imageNameLabel, fontLabel, textLabel, statusLabel, svgFileLabel, pngFileLabel, aboutLabel;
+GButton changeImageButton, svgSaveButton, pngSaveButton, textFileButton, svgFileNameButton, pngFileNameButton;
 GCombo fontSelector;
 GTextField textArea;
 GButton textLoadButton, textSaveButton, textSaveAsButton;
@@ -52,7 +54,7 @@ int FrameWidth=500, FrameHeight=350;
 CanvasWinData canvasData = new CanvasWinData();
 PGraphics OutputImage = canvasData.img;
 int OutputImageWidth = FrameWidth, OutputImageHeight = FrameHeight;
-int OutputBackgroundOpacity=30;
+int OutputBackgroundOpacity=50;
 String PngFileName="textorizer.png";
 
 String Text;
@@ -74,9 +76,9 @@ float T2FontScaleFactor=1.5;
 // =========================
 int TextorizerMode=2; 
 // 0: do nothing
-// 1,2,3: textorizer version
+// 1,2: textorizer version
 
-Boolean NeedsRerendering = true;
+Boolean NeedsRerendering = false;
 
 // =========================
 
@@ -107,8 +109,8 @@ String LabelT1FontMax = "Max Font Size";
 String LabelT1NbStrokes = "Strokes";
 String LabelT1Threshold = "Threshold";
 String LabelT1FontRange = "Font Range";
-String LabelT1Go = "Textorize!";
-String LabelT2Go = "Textorize2!";
+String LabelT1Go = "GO";
+String LabelT2Go = "GO";
 String LabelT2TextSize = "Text Size";
 String LabelT2LineHeight = "Line Height";
 String LabelT2ColourSaturation = "Colour Saturation";
@@ -135,7 +137,7 @@ void loadWords(Boolean ask) {
 
 void saveText(Boolean saveAs) {
   if (saveAs) {
-    TextFileName = selectOutputFile(TextFileName);
+    TextFileName = selectOutputFile(TextFileName,"txt");
   } 
   String[] strings = new String[1];
   strings[0] = Text;
@@ -151,7 +153,7 @@ PImage loadInputImage(String filename) {
   if (newImage!=null && newImage.width!=-1 && newImage.height!=-1) {
     InputImageFileName=newImageFileName;
     loadPixels(); 
-    changeImageButton.setText(newImageFileName.substring(newImageFileName.lastIndexOf("/")+1));
+    changeImageButton.setText(fileName(newImageFileName));
   }
   return newImage;
 }
@@ -161,15 +163,6 @@ void setup() {
 
   // Size has to be the very first statement, or setup() will be run twice
   size(600,400);
-
-//  background(0);
-//  stroke(1);
-//  fill(0);
-//  imageMode(CENTER);
-//  smooth();
-//  noLoop();
-
-
   InputImage = loadImage(InputImageFileName);
   loadPixels();
   Font = createFont(FontName, 32);
@@ -178,21 +171,6 @@ void setup() {
   //  G4P.setFont(this, "Serif", 14);
   G4P.setColorScheme(this, GCScheme.GREY_SCHEME);
   G4P.messagesEnabled(false);
-  canvas = new GWindow(this,"Textorizer",800,500,FrameWidth,FrameHeight,false,P2D);
-  canvas.addData(canvasData);
-  canvas.addDrawHandler(this,"canvasDrawHandler");
-  canvas.addComponentListener(new ComponentAdapter() { 
-    public void componentResized(ComponentEvent e) { 
-      if(e.getSource()==canvas) { 
-        try {
-          canvasApplet.redraw();
-        } catch(Exception ex) {
-          println(ex);
-        }
-      } 
-    } 
-  });
-
 
   // common controls
   imageNameLabel  = new GLabel(this,LabelInputImageFileName,LeftColumnOffset,ypos,100);
@@ -214,22 +192,29 @@ void setup() {
   textSaveAsButton = new GButton(this,"Save as",LeftColumnOffset,ypos+20,35,12);
 
   ypos+=115;
-  int savedypos = ypos; // saved value because we're adding font combo later
- 
+  fontLabel = new GLabel(this,LabelFont,LeftColumnOffset,ypos,50); 
+  fontSelector = new GCombo(this,fontList,7,LeftColumnOffset+50,ypos,230);
 
+
+ 
+  ypos+=115;
+  aboutLabel = new GLabel(this,"http://lapin-bleu.net/software/textorizer",0,ypos,500,12);
+  aboutLabel.setFont("Sans Serif",9);
+  
+  // right column
   ypos=10;
 
   modes = new GOptionGroup();
   optionT1 = new GOption(this,"Textorizer 1",RightColumnOffset,ypos,100);
   modes.addOption(optionT1);
   optionT2 = new GOption(this,"Textorizer 2",RightColumnOffset+100,ypos,100);
+  //  optionT2.setSelected(true);
   modes.addOption(optionT2);
+  modes.setSelected(optionT2);
 
   ypos+=40;
   // Textorizer 2 controls
-  t2Panel = new GPanel(this,"Textorizer 2 Controls",RightColumnOffset,ypos,290,300);
-  t2Panel.setVisible(false);
-  t2Panel.setCollapsed(false);
+  t2Panel = new GPanel(this,"Textorizer 2 Controls",RightColumnOffset,ypos,290,290);
   int pypos = 20;
   t2textSize = new TSlider(this,LabelT2TextSize,5,pypos,T2FontSize,4.0,50.0,t2Panel);
   
@@ -246,13 +231,11 @@ void setup() {
   t2fontScaleFactorSlider = new TSlider(this,LabelT2FontScale,5,pypos,T2FontScaleFactor,0.0,5.0,t2Panel);
   pypos+=55;
   t2goButton=new GButton(this,LabelT2Go,5,pypos,80,20); 
+  t2goButton.setColorScheme(GCScheme.GREEN_SCHEME);
   t2Panel.add(t2goButton);
 
-  //  ypos-=90;
   // Textorizer 1 controls
   t1Panel = new GPanel(this,"Textorizer 1 Controls",RightColumnOffset,ypos,290,250);
-  t1Panel.setVisible(false);
-  t1Panel.setCollapsed(false);
   pypos=20;
   t1numSlider = new TSlider(this,LabelT1NbStrokes,2,pypos,1000,100,10000,t1Panel);
   pypos+=45;
@@ -263,35 +246,56 @@ void setup() {
   t1FontScaleMax = new TSlider(this,LabelT1FontMax,5,pypos,maxFontScale,0f,50f,t1Panel);
   pypos+=55;
   t1goButton = new GButton(this,LabelT1Go,5,pypos,80,20);
+  t1goButton.setColorScheme(GCScheme.GREEN_SCHEME);
   t1Panel.add(t1goButton);
 
-  ypos+=320;
-  svgSaveButton = new GButton(this,LabelSaveSVG,RightColumnOffset,ypos,80,12); 
-  pngSaveButton = new GButton(this,LabelSavePNG,RightColumnOffset+90,ypos,80,12);
+  ypos+=300;
+  svgFileLabel = new GLabel(this,"SVG File:",RightColumnOffset,ypos,55,12);
+  svgFileNameButton = new GButton(this,fileName(SvgFileName),RightColumnOffset+57,ypos,180,12);
+  svgSaveButton = new GButton(this,"Save",RightColumnOffset+245,ypos,40,12); 
+  ypos+=20;
+  pngFileLabel = new GLabel(this,"PNG File:",RightColumnOffset,ypos,55,12);
+  pngFileNameButton = new GButton(this,fileName(PngFileName),RightColumnOffset+57,ypos,180,12);
+  pngSaveButton = new GButton(this,"Save",RightColumnOffset+245,ypos,40,12); 
 
-  // we have to put this at the bottom otherwise it shows behind the rest
-  fontLabel = new GLabel(this,LabelFont,LeftColumnOffset,savedypos,50); 
-  fontSelector = new GCombo(this,fontList,7,LeftColumnOffset+50,savedypos,230);
+
+  t1ControlsSetEnabled(false);
+  t2ControlsSetEnabled(true);
+
+
+  canvas = new GWindow(this,"Textorizer",800,500,FrameWidth,FrameHeight,false,P2D);
+  canvas.addData(canvasData);
+  canvas.setOnTop(false);
+  canvas.addComponentListener(new ComponentAdapter() { 
+    public void componentResized(ComponentEvent e) { 
+      if(e.getSource()==canvas && canvasApplet!=null) canvasApplet.redraw();
+    } 
+  });
+  canvas.addDrawHandler(this,"canvasDrawHandler");
 }
 
 void go() 
 {
   if (TextorizerMode != 0) {
-    OutputImage = createGraphics(OutputImageWidth, OutputImageHeight, P2D);
+    OutputImage = createGraphics(OutputImageWidth, OutputImageHeight, JAVA2D);
     OutputImage.beginDraw();
-    OutputImage.background(255);
     OutputImage.smooth();
+    OutputImage.background(255);
     setupSvg();
     setupFont();
     setupBgPicture();
 
     switch(TextorizerMode) {
-      case 1: textorize(); break;
-      case 2: textorize2(); break;
+    case 1: 
+      textorize(); 
+      if (t1goButton!=null) t1goButton.setColorScheme(GCScheme.GREY_SCHEME);
+    break;
+    case 2: 
+      textorize2(); 
+      if (t2goButton!=null) t2goButton.setColorScheme(GCScheme.GREY_SCHEME);
+      break;
     }
-
     OutputImage.endDraw();
-    OutputImage.save(PngFileName);
   }
 }
 
@@ -304,7 +308,16 @@ void draw()
 void canvasDrawHandler(GWinApplet appc, GWinData data)
 {
   canvasApplet = appc;
-  canvasDraw();
+  if (OutputImage != null)
+    canvasDraw();
+  else {
+    canvasApplet.noLoop();
+    canvasApplet.background(0);
+    canvasApplet.fill(255);
+    canvasApplet.stroke(255);
+    canvasApplet.textFont(Font,20);
+    canvasApplet.text("Press GO to make the picture",100,100);
+  }
 }
 
 void canvasDraw()
@@ -441,84 +454,113 @@ void textorize() {
   }
   
   SvgBuffer.append("</g>\n</svg>\n");
-  SvgOutput=new String[1];
-  SvgOutput[0]=SvgBuffer.toString();
-  saveStrings(SvgFileName, SvgOutput);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void handleTextFieldEvents(GTextField textfield) 
 { 
+  if (t2goButton != null) t2goButton.setColorScheme(GCScheme.GREEN_SCHEME);
+  if (t1goButton != null) t1goButton.setColorScheme(GCScheme.GREEN_SCHEME);
   Text = textfield.getText();
 }
 
 void handleButtonEvents(GButton button) {
-
+  Boolean t1changed = false, t2changed = false;
   if(button == changeImageButton) {
     InputImage = loadInputImage(InputImageFileName);
-  } else if(button == svgSaveButton) {
-    SvgFileName = selectOutputFile(SvgFileName);
-    canvasDraw();
+    t2changed = t2changed = true;
+  } else if (button == svgFileNameButton) {
+    SvgFileName = selectOutputFile(SvgFileName,"svg");
+    svgFileNameButton.setText(fileName(SvgFileName));
+  } else if (button == svgSaveButton) {
+    SvgOutput=new String[1];
+    SvgOutput[0]=SvgBuffer.toString();
+    saveStrings(SvgFileName, SvgOutput);
+  } else if (button == pngFileNameButton) {
+    PngFileName = selectOutputFile(PngFileName,"png");
+    pngFileNameButton.setText(PngFileName);
   } else if(button == pngSaveButton) {
-    PngFileName = selectOutputFile(PngFileName);
-    NeedsRerendering=true;
-    canvasDraw();
+    OutputImage.save(PngFileName);
   } else if(button == t1goButton) {
     TextorizerMode=1;
     NeedsRerendering=true;
     canvasDraw();
+    t1goButton.setColorScheme(GCScheme.GREY_SCHEME);
+    t2changed = true;
   } else if(button == t2goButton) {
     TextorizerMode=2;
     NeedsRerendering=true;
     canvasDraw();
+    t1changed = true;
+    t2goButton.setColorScheme(GCScheme.GREY_SCHEME);
   } else if (button == textFileButton) {
     loadWords(true);
-    textFileButton.setText(TextFileName.substring(TextFileName.lastIndexOf("/")+1));
+    textFileButton.setText(fileName(TextFileName));
+    t2changed = t2changed = true;
   } else if (button == textSaveButton) {
     saveText(false);
   } else if (button == textSaveAsButton) {
     saveText(true);
-    textFileButton.setText(TextFileName.substring(TextFileName.lastIndexOf("/")+1));
+    textFileButton.setText(fileName(TextFileName));
   }
+  if (t1changed && t1goButton != null) t1goButton.setColorScheme(GCScheme.GREEN_SCHEME);
+  if (t2changed && t2goButton != null) t2goButton.setColorScheme(GCScheme.GREEN_SCHEME);
 }
 
 void handleSliderEvents(GSlider slider) {
-  if (slider == t1numSlider) { // 1
+  println("slider event "+slider);
+  Boolean t1changed = false, t2changed = false;
+  if (slider == t1numSlider) {
     NStrokes = slider.getValue();
-  } else if (slider == t1thresholdSlider) { // 2
+    t1changed = true;
+  } else if (slider == t1thresholdSlider) {
     Threshold = slider.getValuef();
+    t1changed = true;
   } else if (slider == bgOpacitySlider) {
     OutputBackgroundOpacity = slider.getValue();
+    t1changed = t2changed = true;
   } else if (slider == outputWidthSlider) {
     OutputImageWidth = slider.getValue();
     OutputImageHeight = OutputImageWidth * InputImage.height / InputImage.width;
-  } else if (slider == t1FontScaleMin) { // 4
+    t1changed = t2changed = true;
+  } else if (slider == t1FontScaleMin) {
     minFontScale = slider.getValuef();
     if (minFontScale > maxFontScale) {
       minFontScale=maxFontScale;
       slider.setValue(minFontScale);
     }
-  } else if (slider == t1FontScaleMax) { // 4
+    t1changed = true;
+  } else if (slider == t1FontScaleMax) {
     maxFontScale = slider.getValuef();
     if (minFontScale > maxFontScale) {
       maxFontScale=minFontScale;
       slider.setValue(maxFontScale);
     }
-  } else if (slider == t2lineHeight) { // 100
+    t1changed=true;
+  } else if (slider == t2lineHeight) {
     T2LineHeight = slider.getValuef();
-  } else if (slider == t2textSize) { // 101
+    t2changed=true;
+  } else if (slider == t2textSize) {
     T2FontSize = slider.getValuef();
-  } else if (slider == t2colorAdjustment) { // 102
+    t2changed=true;
+  } else if (slider == t2colorAdjustment) {
+    t2changed=true;
     T2ColourAdjustment = slider.getValuef();
-  } else if (slider == t2kerningSlider) { // 105
+  } else if (slider == t2kerningSlider) {
     T2Kerning = slider.getValuef();
-  } else if (slider == t2fontScaleFactorSlider) { // 106
+    t2changed = true;
+  } else if (slider == t2fontScaleFactorSlider) {
     T2FontScaleFactor = slider.getValuef();
+    t2changed = true;
   }  
+  if (t1changed && t1goButton != null) t1goButton.setColorScheme(GCScheme.GREEN_SCHEME);
+  if (t2changed && t2goButton != null) t2goButton.setColorScheme(GCScheme.GREEN_SCHEME);
 }
 
 void handleComboEvents(GCombo combo){
+  if (t2goButton != null) t2goButton.setColorScheme(GCScheme.GREEN_SCHEME);
+  if (t1goButton != null) t1goButton.setColorScheme(GCScheme.GREEN_SCHEME);
   if (combo == fontSelector) {
     // Get font name and size from
     String[] fs = combo.selectedText().split(" ");
@@ -529,11 +571,11 @@ void handleComboEvents(GCombo combo){
 
 public void handleOptionEvents(GOption selected, GOption deselected){
   if (selected == optionT1) {
-    t2Panel.setVisible(false);
-    t1Panel.setVisible(true);
+    t1ControlsSetEnabled(true);
+    t2ControlsSetEnabled(false);
   } else if (selected == optionT2) {
-    t1Panel.setVisible(false);
-    t2Panel.setVisible(true);
+    t1ControlsSetEnabled(false);
+    t2ControlsSetEnabled(true);
   }
 }
 
@@ -544,10 +586,16 @@ String selectInputFile(String defaultName)
   return ((s=selectInput())!=null) ? s : defaultName;
 }
 
-String selectOutputFile(String defaultName)
+String selectOutputFile(String defaultName, String extension)
 {
   String s;
-  return ((s=selectOutput())!=null) ? s : defaultName;
+  s = selectOutput("Choose a "+extension+" file");
+  if (s==null) {
+    s = defaultName; // user cancelled
+  } else {
+    if (!s.endsWith("."+extension)) s+="."+extension;
+  }
+  return s;
 }
 
 
@@ -673,6 +721,11 @@ color pixelAverageAt(int x, int y, int radius)
   return color(resultR/count, resultG/count, resultB/count);
 }
 
+String fileName(String fullName)
+{
+  return fullName.substring(fullName.lastIndexOf("/")+1);
+}
+
 
 class CanvasWinData extends GWinData {
   public PGraphics img;
@@ -709,5 +762,41 @@ class TSlider extends GWSlider {
     l = new GLabel(theApplet, label, x, y, SliderOffset);
     panel.add(this);
     panel.add(l);
+  }
+  public void setEnabled(Boolean enabled) {
+    l.setEnabled(enabled);
+    super.setEnabled(enabled);
+  }
+}
+
+
+void t1ControlsSetEnabled(Boolean enable) 
+{
+  if (t1Panel!=null) {
+    t1Panel.setEnabled(enable);
+    t1Panel.setVisible(enable);
+    t1Panel.setCollapsed(!enable);
+    t1Panel.setFocus(enable);
+    t1goButton.setEnabled(enable);
+    t1numSlider.setEnabled(enable);
+    t1thresholdSlider.setEnabled(enable);
+    t1FontScaleMin.setEnabled(enable);
+    t1FontScaleMax.setEnabled(enable);
+  }
+}
+
+void t2ControlsSetEnabled(Boolean enable) 
+{
+  if (t2Panel!=null) {
+    t2Panel.setEnabled(enable);
+    t2Panel.setVisible(enable);
+    t2Panel.setCollapsed(!enable);
+    t2Panel.setFocus(enable);
+    t2goButton.setEnabled(enable);
+    t2lineHeight.setEnabled(enable);
+    t2textSize.setEnabled(enable);
+    t2colorAdjustment.setEnabled(enable);
+    t2kerningSlider.setEnabled(enable);
+    t2fontScaleFactorSlider.setEnabled(enable);
   }
 }
