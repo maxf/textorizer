@@ -693,7 +693,6 @@ void textorize2()
 
   SvgOutput=new String[1];
   SvgOutput[0]=SvgBuffer.toString();
-  saveStrings(SvgFileName, SvgOutput);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
