@@ -509,7 +509,6 @@ void handleButtonEvents(GButton button) {
 }
 
 void handleSliderEvents(GSlider slider) {
-  println("slider event "+slider);
   Boolean t1changed = false, t2changed = false;
   if (slider == t1numSlider) {
     NStrokes = slider.getValue();
@@ -776,12 +775,6 @@ void t1ControlsSetEnabled(Boolean enable)
     t1Panel.setEnabled(enable);
     t1Panel.setVisible(enable);
     t1Panel.setCollapsed(!enable);
-    t1Panel.setFocus(enable);
-    t1goButton.setEnabled(enable);
-    t1numSlider.setEnabled(enable);
-    t1thresholdSlider.setEnabled(enable);
-    t1FontScaleMin.setEnabled(enable);
-    t1FontScaleMax.setEnabled(enable);
   }
 }
 
@@ -791,12 +784,5 @@ void t2ControlsSetEnabled(Boolean enable)
     t2Panel.setEnabled(enable);
     t2Panel.setVisible(enable);
     t2Panel.setCollapsed(!enable);
-    t2Panel.setFocus(enable);
-    t2goButton.setEnabled(enable);
-    t2lineHeight.setEnabled(enable);
-    t2textSize.setEnabled(enable);
-    t2colorAdjustment.setEnabled(enable);
-    t2kerningSlider.setEnabled(enable);
-    t2fontScaleFactorSlider.setEnabled(enable);
   }
 }
