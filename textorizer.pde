@@ -108,7 +108,6 @@ String LabelT1FontMax = "Max Font Size";
 
 String LabelT1NbStrokes = "Strokes";
 String LabelT1Threshold = "Threshold";
-String LabelT1FontRange = "Font Range";
 String LabelT1Go = "GO";
 String LabelT2Go = "GO";
 String LabelT2TextSize = "Text Size";
@@ -117,7 +116,6 @@ String LabelT2ColourSaturation = "Colour Saturation";
 String LabelT2Kerning = "Kerning";
 String LabelT2FontScale = "Font Scale";
 String LabelT2TextFile = "Text file (TXT format): ";
-String LabelInfo = "-- http://lapin-bleu.net/software/textorizer - max@lapin-bleu.net --";
 
 // ########################
 
